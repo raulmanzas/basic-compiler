@@ -10,11 +10,25 @@ class TokenClass(Enum):
     OPERATOR = 5
     SEPARATOR = 6
 
+    @classmethod
+    def validate(classes, value):
+        if isinstance(value, int):
+            if not (any(value == id.value for id in classes)):
+                raise Exception("Token class identifier is invalid: '{}'".format(value))
+
+        if isinstance(value, str):
+            if value not in TokenClass.__members__:
+                raise Exception("Token class identifier is not valid: '{}'".format(value))
+        
+        raise Exception("A token class identifier must be a integer or a string")
+
 class Token():
     def __init__(self, token_class, value, line, column):
+        TokenClass.validate(token_class)
+
+        self.token_class = token_class
         self.line = line
         self.column = column
-        self.token_class = token_class
         self.value = value
     
     def __str__(self):
