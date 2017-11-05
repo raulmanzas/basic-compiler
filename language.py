@@ -49,3 +49,8 @@ class PatternHelpers():
     def is_separator(self, char):
         separators = [".", ",", ";", "(", ")", "{", "}", "[", "]"]
         return char in separators
+
+    def is_operator(self, char):
+        operators = ["+", "-", "*", "/", "%", "?", ">", "<", "=", ">=", "<=",
+                     "==", "!", "+=", "-=", "*=", "/=", "++", "--"]
+        return char in operators

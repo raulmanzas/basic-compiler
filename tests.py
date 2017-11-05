@@ -98,7 +98,42 @@ class TestScanner(unittest.TestCase):
         self.assertEqual(TokenClass.SEPARATOR, scanner.tokens[6].token_class)
         self.assertEqual(TokenClass.SEPARATOR, scanner.tokens[7].token_class)
         self.assertEqual(TokenClass.SEPARATOR, scanner.tokens[8].token_class)
+    
+    def test_can_read_operator(self):
+        mock_code = ["="]
+        scanner = Scanner(mock_code)
         
+        token, new_pos = scanner.read_operator(0, 0)
+        self.assertEqual(TokenClass.OPERATOR, token.token_class)
+    
+    def test_can_read_2part_operator(self):
+        mock_code = ["+="]
+        scanner = Scanner(mock_code)
 
+        token, new_pos = scanner.read_operator(0, 0)
+        self.assertEqual(TokenClass.OPERATOR, token.token_class)
+    
+    def test_can_read_multiple_operators(self):
+        mock_code = ["+ *= >= ?"]
+        scanner = Scanner(mock_code)
+        scanner.scan()
+
+        self.assertEqual(len(scanner.tokens), 4)
+        self.assertEqual(scanner.tokens[0].token_class, TokenClass.OPERATOR)
+        self.assertEqual(scanner.tokens[1].token_class, TokenClass.OPERATOR)
+        self.assertEqual(scanner.tokens[2].token_class, TokenClass.OPERATOR)
+        self.assertEqual(scanner.tokens[3].token_class, TokenClass.OPERATOR)
+    
+    def test_can_read_multiple_operators(self):
+        mock_code = ["- /", "== <="]
+        scanner = Scanner(mock_code)
+        scanner.scan()
+
+        self.assertEqual(len(scanner.tokens), 4)
+        self.assertEqual(scanner.tokens[0].token_class, TokenClass.OPERATOR)
+        self.assertEqual(scanner.tokens[1].token_class, TokenClass.OPERATOR)
+        self.assertEqual(scanner.tokens[2].token_class, TokenClass.OPERATOR)
+        self.assertEqual(scanner.tokens[3].token_class, TokenClass.OPERATOR)
+        
 if __name__ == '__main__':
     unittest.main()

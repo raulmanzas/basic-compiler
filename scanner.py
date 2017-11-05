@@ -45,7 +45,24 @@ class Scanner():
         if self.helper.is_separator(value):
             position += 1
             return Token(TokenClass.SEPARATOR, value, line_pos, position), position
+
+        msg = "Couldn't understant '{}' in {}:{}".format(value, line_pos, position)
+        raise Exception(msg)
     
+    def read_operator(self, position, line_pos):
+        line = self.code[line_pos]
+        value = line[position]
+        if self.helper.is_operator(value):
+            position += 1
+            if position < len(line) and self.helper.is_operator(value + line[position]):
+                value += line[position]
+                position += 1
+                return Token(TokenClass.OPERATOR, value, line_pos, position), position
+            return Token(TokenClass.OPERATOR, value, line_pos, position), position
+        
+        msg = "Couldn't understant '{}' in {}:{}".format(value, line_pos, position)
+        raise Exception(msg)
+
     def scan(self):
         line_pos = 0
         for line in self.code:
@@ -64,5 +81,9 @@ class Scanner():
                 
                 elif self.helper.is_separator(line[read_pos]):
                     token, read_pos = self.read_separator(read_pos, line_pos)
+                    self.tokens.append(token)
+                
+                elif self.helper.is_operator(line[read_pos]):
+                    token, read_pos = self.read_operator(read_pos, line_pos)
                     self.tokens.append(token)
             line_pos += 1
