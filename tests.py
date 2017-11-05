@@ -47,6 +47,25 @@ class TestScanner(unittest.TestCase):
         
         with self.assertRaises(Exception):
             scanner.scan()
+    
+    def test_can_read_charconst_multiple_lines(self):
+        mock_code = ["'a' 'b'","'c'"]
+        scanner = Scanner(mock_code)
+        
+        scanner.scan()
+        self.assertEqual(len(scanner.tokens), 3)
+        self.assertEqual(scanner.tokens[0].token_class, TokenClass.CHARCONST)
+        self.assertEqual(scanner.tokens[1].token_class, TokenClass.CHARCONST)
+        self.assertEqual(scanner.tokens[2].token_class, TokenClass.CHARCONST)
+    
+    def test_can_read_charconst_empty(self):
+        mock_code = ["''"]
+        scanner = Scanner(mock_code)
 
+        token, new_pos = scanner.read_charconst(0, 0)
+        self.assertEqual(token.token_class, TokenClass.CHARCONST)
+        self.assertEqual(new_pos, 2)
+        
+    
 if __name__ == '__main__':
     unittest.main()
