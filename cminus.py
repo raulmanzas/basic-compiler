@@ -27,5 +27,5 @@ if __name__ == '__main__':
         main(args.file)
     else:
         #debug only
-        main("./tests/charconst.c")
+        main("./testfiles/numconst.c")
         print("You must supply a C- source code file!")

@@ -33,7 +33,7 @@ class Scanner():
         if position < len(line) and line[position] == "'":
             return Token(TokenClass.CHARCONST, value, line_pos, position), position + 1
         else:
-            msg = "Couldn't understant '{}' in {}:{}".format(line[position], line_pos, position)
+            msg = "Couldn't understant '{}' in {}:{}".format(value, line_pos, position)
             raise Exception(msg)
 
     def read_blank(self, position, line):
@@ -56,6 +56,4 @@ class Scanner():
                 elif line[read_pos] == "'":
                     token, read_pos = self.read_charconst(read_pos, line_pos)
                     self.tokens.append(token)
-            
             line_pos += 1
-        print(self.tokens)
