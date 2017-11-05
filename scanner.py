@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from language import Token, TokenClass
+from language import Token, TokenClass, PatternHelpers
 
 class Scanner():
     def __init__(self, source_code):
         if len(source_code) == 0:
             raise Exception("Source code file is empty")
+        self.helper = PatternHelpers()
         self.code = source_code
         self.tokens = []
     
-    def is_blank(self, char):
-        return char == ' ' or char == '\t' or char == '\n'
-
     def read_numconst(self, position, line_pos):
         value = ""
         line = self.code[line_pos]
@@ -37,10 +35,17 @@ class Scanner():
             raise Exception(msg)
 
     def read_blank(self, position, line):
-        while position < len(line) and self.is_blank(line[position]):
+        while position < len(line) and self.helper.is_blank(line[position]):
             position += 1
         return position
 
+    def read_separator(self, position, line_pos):
+        line = self.code[line_pos]
+        value = line[position]
+        if self.helper.is_separator(value):
+            position += 1
+            return Token(TokenClass.SEPARATOR, value, line_pos, position), position
+    
     def scan(self):
         line_pos = 0
         for line in self.code:
@@ -50,10 +55,14 @@ class Scanner():
                     token, read_pos = self.read_numconst(read_pos, line_pos)
                     self.tokens.append(token)
                 
-                elif self.is_blank(line[read_pos]):
+                elif self.helper.is_blank(line[read_pos]):
                     read_pos = self.read_blank(read_pos, line)
                 
                 elif line[read_pos] == "'":
                     token, read_pos = self.read_charconst(read_pos, line_pos)
+                    self.tokens.append(token)
+                
+                elif self.helper.is_separator(line[read_pos]):
+                    token, read_pos = self.read_separator(read_pos, line_pos)
                     self.tokens.append(token)
             line_pos += 1

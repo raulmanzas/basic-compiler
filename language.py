@@ -39,3 +39,13 @@ class Token():
 
     def __repr__(self):
         return "Token class: {}, Value: {}".format(self.token_class, self.value)
+
+class PatternHelpers():
+    
+    def is_blank(self, char):
+        blanks = [" ", "\t", "\n"]
+        return char in blanks
+
+    def is_separator(self, char):
+        separators = [".", ",", ";", "(", ")", "{", "}", "[", "]"]
+        return char in separators

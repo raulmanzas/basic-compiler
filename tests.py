@@ -65,7 +65,40 @@ class TestScanner(unittest.TestCase):
         token, new_pos = scanner.read_charconst(0, 0)
         self.assertEqual(token.token_class, TokenClass.CHARCONST)
         self.assertEqual(new_pos, 2)
-        
     
+    def test_can_read_separator(self):
+        mock_code = [","]
+        scanner = Scanner(mock_code)
+
+        token, new_pos = scanner.read_separator(0, 0)
+        self.assertEqual(TokenClass.SEPARATOR, token.token_class)
+    
+    def test_can_read_separators_multiple_lines(self):
+        mock_code = [",", ";", "{"]
+        scanner = Scanner(mock_code)
+        scanner.scan()
+        
+        self.assertEqual(len(scanner.tokens), 3)
+        self.assertEqual(TokenClass.SEPARATOR, scanner.tokens[0].token_class)
+        self.assertEqual(TokenClass.SEPARATOR, scanner.tokens[1].token_class)
+        self.assertEqual(TokenClass.SEPARATOR, scanner.tokens[2].token_class)
+    
+    def test_can_read_separators_multiple_lines(self):
+        mock_code = [", { ( } ) ] ; . ["]
+        scanner = Scanner(mock_code)
+        scanner.scan()
+        
+        self.assertEqual(len(scanner.tokens), 9)
+        self.assertEqual(TokenClass.SEPARATOR, scanner.tokens[0].token_class)
+        self.assertEqual(TokenClass.SEPARATOR, scanner.tokens[1].token_class)
+        self.assertEqual(TokenClass.SEPARATOR, scanner.tokens[2].token_class)
+        self.assertEqual(TokenClass.SEPARATOR, scanner.tokens[3].token_class)
+        self.assertEqual(TokenClass.SEPARATOR, scanner.tokens[4].token_class)
+        self.assertEqual(TokenClass.SEPARATOR, scanner.tokens[5].token_class)
+        self.assertEqual(TokenClass.SEPARATOR, scanner.tokens[6].token_class)
+        self.assertEqual(TokenClass.SEPARATOR, scanner.tokens[7].token_class)
+        self.assertEqual(TokenClass.SEPARATOR, scanner.tokens[8].token_class)
+        
+
 if __name__ == '__main__':
     unittest.main()
