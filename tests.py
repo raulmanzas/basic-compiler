@@ -172,6 +172,46 @@ class TestScanner(unittest.TestCase):
         self.assertEqual(scanner.tokens[1].token_class, TokenClass.KEYWORD)
         self.assertEqual(scanner.tokens[2].token_class, TokenClass.KEYWORD)
         self.assertEqual(scanner.tokens[3].token_class, TokenClass.KEYWORD)
+    
+    def test_can_read_id(self):
+        mock_code = ["teste"]
+        scanner = Scanner(mock_code)
+        
+        token, pos = scanner.try_read_id(0, 0)
+        self.assertEqual(token.token_class, TokenClass.ID)
+    
+    def test_can_read_id_with_numbers(self):
+        mock_code = ["teste112"]
+        scanner = Scanner(mock_code)
+        
+        token, pos = scanner.try_read_id(0, 0)
+        self.assertEqual(token.token_class, TokenClass.ID)
+    
+    def test_can_read_multiple_id(self):
+        mock_code = ["teste112 abc12"]
+        scanner = Scanner(mock_code)
+        scanner.scan()
+        
+        self.assertEqual(len(scanner.tokens), 2)
+        self.assertEqual(scanner.tokens[0].token_class, TokenClass.ID)
+        self.assertEqual(scanner.tokens[1].token_class, TokenClass.ID)
+    
+    def test_can_read_multiple_lines_id(self):
+        mock_code = ["teste112 abc12", "sim123"]
+        scanner = Scanner(mock_code)
+        scanner.scan()
+        
+        self.assertEqual(len(scanner.tokens), 3)
+        self.assertEqual(scanner.tokens[0].token_class, TokenClass.ID)
+        self.assertEqual(scanner.tokens[1].token_class, TokenClass.ID)
+        self.assertEqual(scanner.tokens[2].token_class, TokenClass.ID)
+    
+    def test_cant_read_id_starting_with_number(self):
+        mock_code = ["112andre"]
+        scanner = Scanner(mock_code)
+        
+        with self.assertRaises(Exception):
+            scanner.scan()
 
 if __name__ == '__main__':
     unittest.main()

@@ -16,6 +16,10 @@ class Scanner():
         while position < len(line) and line[position].isdigit():
             value += line[position]
             position += 1
+        
+        if position < len(line) and line[position].isalpha():
+            raise Exception("Could not understand '{}' in {}:{}".format(value, line_pos, position))
+        
         return Token(TokenClass.NUMCONST, value, line_pos, position - 1), position
 
     def read_charconst(self, position, line_pos):
@@ -64,6 +68,7 @@ class Scanner():
         raise Exception(msg)
     
     def try_read_keyword(self, position, line_pos):
+        start_position = position
         line = self.code[line_pos]
         lexeme = ""
         while position < len(line) and line[position].isalpha():
@@ -72,7 +77,20 @@ class Scanner():
 
         if self.helper.is_keyword(lexeme):
             return Token(TokenClass.KEYWORD, lexeme, line_pos, position), position
-        return None, position
+        return None, start_position
+
+    def try_read_id(self, position, line_pos):
+        line = self.code[line_pos]
+        lexeme = ""
+
+        if line[position].isdigit():
+            raise Exception("Could not understand '{}' in {}:{}".format(line[position], line_pos, position))
+
+        while position < len(line) and (line[position].isalpha() or line[position].isdigit()):
+            lexeme += line[position]
+            position += 1
+        #TODO: chamar a symboltable
+        return Token(TokenClass.ID, lexeme, line_pos, position), position
 
     def scan(self):
         line_pos = 0
@@ -103,8 +121,10 @@ class Scanner():
                 
                 elif line[read_pos].isalpha():
                     token, read_pos = self.try_read_keyword(read_pos, line_pos)
-                    self.tokens.append(token)
                     if token is None:
-                        pass
-                
+                        token, read_pos = self.try_read_id(read_pos, line_pos)
+                        self.tokens.append(token)
+                    else:
+                        self.tokens.append(token)
+                        
             line_pos += 1
