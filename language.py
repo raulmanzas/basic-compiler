@@ -54,3 +54,6 @@ class PatternHelpers():
         operators = ["+", "-", "*", "/", "%", "?", ">", "<", "=", ">=", "<=",
                      "==", "!", "+=", "-=", "*=", "/=", "++", "--"]
         return char in operators
+
+    def is_comment(self, line, read_pos):
+        return line[read_pos] == '/' and read_pos + 1 < len(line) and line[read_pos + 1] == '/'

@@ -83,7 +83,11 @@ class Scanner():
                     token, read_pos = self.read_separator(read_pos, line_pos)
                     self.tokens.append(token)
                 
+                elif self.helper.is_comment(line, read_pos):
+                    read_pos = len(line)
+
                 elif self.helper.is_operator(line[read_pos]):
                     token, read_pos = self.read_operator(read_pos, line_pos)
                     self.tokens.append(token)
+                
             line_pos += 1
