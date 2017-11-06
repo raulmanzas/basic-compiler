@@ -143,5 +143,35 @@ class TestScanner(unittest.TestCase):
         self.assertEqual(len(scanner.tokens), 1)
         self.assertEqual(scanner.tokens[0].token_class, TokenClass.NUMCONST)
     
+    def test_can_read_keyword(self):
+        mock_code = ["static"]
+        scanner = Scanner(mock_code)
+
+        token, pos = scanner.try_read_keyword(0, 0)
+        self.assertNotEqual(token, None)
+        self.assertEqual(token.token_class, TokenClass.KEYWORD)
+    
+    def test_can_read_multiple_keywords(self):
+        mock_code = ["static int if else"]
+        scanner = Scanner(mock_code)
+        scanner.scan()
+
+        self.assertEqual(len(scanner.tokens), 4)
+        self.assertEqual(scanner.tokens[0].token_class, TokenClass.KEYWORD)
+        self.assertEqual(scanner.tokens[1].token_class, TokenClass.KEYWORD)
+        self.assertEqual(scanner.tokens[2].token_class, TokenClass.KEYWORD)
+        self.assertEqual(scanner.tokens[3].token_class, TokenClass.KEYWORD)
+    
+    def test_can_read_keywords_multiple_lines(self):
+        mock_code = ["static int", "if else"]
+        scanner = Scanner(mock_code)
+        scanner.scan()
+
+        self.assertEqual(len(scanner.tokens), 4)
+        self.assertEqual(scanner.tokens[0].token_class, TokenClass.KEYWORD)
+        self.assertEqual(scanner.tokens[1].token_class, TokenClass.KEYWORD)
+        self.assertEqual(scanner.tokens[2].token_class, TokenClass.KEYWORD)
+        self.assertEqual(scanner.tokens[3].token_class, TokenClass.KEYWORD)
+
 if __name__ == '__main__':
     unittest.main()

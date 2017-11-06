@@ -51,9 +51,15 @@ class PatternHelpers():
         return char in separators
 
     def is_operator(self, char):
+        #TODO: add 'and', 'or' and 'not'
         operators = ["+", "-", "*", "/", "%", "?", ">", "<", "=", ">=", "<=",
                      "==", "!", "+=", "-=", "*=", "/=", "++", "--"]
         return char in operators
 
     def is_comment(self, line, read_pos):
         return line[read_pos] == '/' and read_pos + 1 < len(line) and line[read_pos + 1] == '/'
+
+    def is_keyword(self, lexeme):
+        keywords = ["int","record","static", "bool", "char", "if",
+                     "else", "while", "return", "break", "true", "false"]
+        return lexeme in keywords

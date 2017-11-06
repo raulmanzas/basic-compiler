@@ -62,6 +62,17 @@ class Scanner():
         
         msg = "Couldn't understant '{}' in {}:{}".format(value, line_pos, position)
         raise Exception(msg)
+    
+    def try_read_keyword(self, position, line_pos):
+        line = self.code[line_pos]
+        lexeme = ""
+        while position < len(line) and line[position].isalpha():
+            lexeme += line[position]
+            position += 1
+
+        if self.helper.is_keyword(lexeme):
+            return Token(TokenClass.KEYWORD, lexeme, line_pos, position), position
+        return None, position
 
     def scan(self):
         line_pos = 0
@@ -89,5 +100,11 @@ class Scanner():
                 elif self.helper.is_operator(line[read_pos]):
                     token, read_pos = self.read_operator(read_pos, line_pos)
                     self.tokens.append(token)
+                
+                elif line[read_pos].isalpha():
+                    token, read_pos = self.try_read_keyword(read_pos, line_pos)
+                    self.tokens.append(token)
+                    if token is None:
+                        pass
                 
             line_pos += 1

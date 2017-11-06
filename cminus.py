@@ -27,5 +27,5 @@ if __name__ == '__main__':
         main(args.file)
     else:
         #debug only
-        main("./testfiles/operators.c")
+        main("./testfiles/keywords.c")
         print("You must supply a C- source code file!")
