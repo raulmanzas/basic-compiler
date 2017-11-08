@@ -60,6 +60,10 @@ class PatternHelpers():
                      "==", "!", "+=", "-=", "*=", "/=", "++", "--"]
         return char in operators
 
+    def is_logical_operator(self, lexeme):
+        operators = ["and", "or", "not"]
+        return lexeme in operators
+
     def is_comment(self, line, read_pos):
         return line[read_pos] == '/' and read_pos + 1 < len(line) and line[read_pos + 1] == '/'
 
@@ -80,3 +84,10 @@ class SymbolTable():
         if self.hashtable[value]:
             return self.hashtable[value]
         return None
+
+    def __str__(self):
+        representation = ""
+        for key in self.hashtable.keys():
+            representation += "Key: {} \n".format(key)
+        
+        return representation

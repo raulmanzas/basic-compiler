@@ -78,6 +78,8 @@ class Scanner():
 
         if self.helper.is_keyword(lexeme):
             return Token(TokenClass.KEYWORD, lexeme, line_pos, position), position
+        if self.helper.is_logical_operator(lexeme):
+            return Token(TokenClass.OPERATOR, lexeme, line_pos, position), position
         return None, start_position
 
     def try_read_id(self, position, line_pos):
@@ -137,3 +139,4 @@ class Scanner():
                         self.tokens.append(token)
             line_pos += 1
         self.show_tokens()
+        print(self.symbolTable)

@@ -124,6 +124,14 @@ class TestScanner(unittest.TestCase):
         self.assertEqual(scanner.tokens[2].token_class, TokenClass.OPERATOR)
         self.assertEqual(scanner.tokens[3].token_class, TokenClass.OPERATOR)
     
+    def test_can_read_logical_operators(self):
+        mock_code = ["and"]
+        scanner = Scanner(mock_code)
+        scanner.scan()
+
+        self.assertEqual(len(scanner.tokens), 1)
+        self.assertEqual(scanner.tokens[0].token_class, TokenClass.OPERATOR)
+    
     def test_can_read_multiple_operators(self):
         mock_code = ["- /", "== <="]
         scanner = Scanner(mock_code)
@@ -135,6 +143,17 @@ class TestScanner(unittest.TestCase):
         self.assertEqual(scanner.tokens[2].token_class, TokenClass.OPERATOR)
         self.assertEqual(scanner.tokens[3].token_class, TokenClass.OPERATOR)
     
+    def test_can_read_multiple_logical_operators(self):
+        mock_code = ["and", "or", "not and"]
+        scanner = Scanner(mock_code)
+        scanner.scan()
+
+        self.assertEqual(len(scanner.tokens), 4)
+        self.assertEqual(scanner.tokens[0].token_class, TokenClass.OPERATOR)
+        self.assertEqual(scanner.tokens[1].token_class, TokenClass.OPERATOR)
+        self.assertEqual(scanner.tokens[2].token_class, TokenClass.OPERATOR)
+        self.assertEqual(scanner.tokens[3].token_class, TokenClass.OPERATOR)
+
     def test_can_ignore_comments(self):
         mock_code = ["123 //id do usuario"]
         scanner = Scanner(mock_code)
