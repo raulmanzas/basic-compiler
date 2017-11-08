@@ -10,6 +10,9 @@ class TokenClass(Enum):
     OPERATOR = 5
     SEPARATOR = 6
 
+    def __str__(self):
+        return self.name
+
     @classmethod
     def validate(classes, value):
         if isinstance(value, int):
@@ -35,7 +38,8 @@ class Token():
         self.value = value
     
     def __str__(self):
-        return "{} in line: {}, col: {}".format(self.value, self.line, self.column)
+        return "Token '{}' with value '{}' in line: {}, col: {}".format(self.token_class,
+            self.value, self.line, self.column)
 
     def __repr__(self):
         return "Token class: {}, Value: {}".format(self.token_class, self.value)
@@ -63,3 +67,16 @@ class PatternHelpers():
         keywords = ["int","record","static", "bool", "char", "if",
                      "else", "while", "return", "break", "true", "false"]
         return lexeme in keywords
+
+class SymbolTable():
+    def __init__(self):
+        self.hashtable = {}
+    
+    def store(self, token):
+        if not self.hashtable[token.value]:
+            self.hashtable[token.value] = token
+    
+    def lookup(self, value):
+        if self.hashtable[value]:
+            return self.hashtable[value]
+        return None

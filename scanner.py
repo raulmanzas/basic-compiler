@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from language import Token, TokenClass, PatternHelpers
+from language import Token, TokenClass, PatternHelpers, SymbolTable
 
 class Scanner():
     def __init__(self, source_code):
@@ -9,6 +9,7 @@ class Scanner():
         self.helper = PatternHelpers()
         self.code = source_code
         self.tokens = []
+        self.symbolTable = SymbolTable()
     
     def read_numconst(self, position, line_pos):
         value = ""
@@ -89,8 +90,16 @@ class Scanner():
         while position < len(line) and (line[position].isalpha() or line[position].isdigit()):
             lexeme += line[position]
             position += 1
-        #TODO: chamar a symboltable
-        return Token(TokenClass.ID, lexeme, line_pos, position), position
+        
+        # creates and stores the token in the symbol table
+        token = Token(TokenClass.ID, lexeme, line_pos, position)
+        # self.symbolTable.store(token)
+        return token, position
+
+    def show_tokens(self):
+        width = max(len(tk.token_class.name) for tk in self.tokens)
+        for tk in self.tokens:
+            print("{} \t{} \t {}:{}".format(tk.token_class.name.ljust(width), tk.value.ljust(width), tk.line, tk.column))
 
     def scan(self):
         line_pos = 0
@@ -126,5 +135,5 @@ class Scanner():
                         self.tokens.append(token)
                     else:
                         self.tokens.append(token)
-                        
             line_pos += 1
+        self.show_tokens()
