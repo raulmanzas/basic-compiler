@@ -212,6 +212,14 @@ class TestScanner(unittest.TestCase):
         
         with self.assertRaises(Exception):
             scanner.scan()
+    
+    def test_can_store_symbol_table(self):
+        mock_code = ["identifier"]
+        scanner = Scanner(mock_code)
+        scanner.scan()
+
+        self.assertEqual(scanner.symbolTable.lookup("identifier").token_class, TokenClass.ID)
+        self.assertEqual(len(scanner.symbolTable.hashtable), 1)
 
 if __name__ == '__main__':
     unittest.main()

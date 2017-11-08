@@ -73,7 +73,7 @@ class SymbolTable():
         self.hashtable = {}
     
     def store(self, token):
-        if not self.hashtable[token.value]:
+        if token.value not in self.hashtable:
             self.hashtable[token.value] = token
     
     def lookup(self, value):

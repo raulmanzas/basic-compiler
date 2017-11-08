@@ -93,7 +93,7 @@ class Scanner():
         
         # creates and stores the token in the symbol table
         token = Token(TokenClass.ID, lexeme, line_pos, position)
-        # self.symbolTable.store(token)
+        self.symbolTable.store(token)
         return token, position
 
     def show_tokens(self):
