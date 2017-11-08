@@ -10,6 +10,7 @@ class Scanner():
         self.code = source_code
         self.tokens = []
         self.symbolTable = SymbolTable()
+        self.error_list = []
     
     def read_numconst(self, position, line_pos):
         value = ""
@@ -19,7 +20,7 @@ class Scanner():
             position += 1
         
         if position < len(line) and line[position].isalpha():
-            raise Exception("Could not understand '{}' in {}:{}".format(value, line_pos, position))
+            self.register_error(line[position + 1], line_pos, position)
         
         return Token(TokenClass.NUMCONST, value, line_pos, position - 1), position
 
@@ -36,8 +37,7 @@ class Scanner():
         if position < len(line) and line[position] == "'":
             return Token(TokenClass.CHARCONST, value, line_pos, position), position + 1
         else:
-            msg = "Couldn't understant '{}' in {}:{}".format(value, line_pos, position)
-            raise Exception(msg)
+            self.register_error(line[position], line_pos, position)
 
     def read_blank(self, position, line):
         while position < len(line) and self.helper.is_blank(line[position]):
@@ -50,9 +50,8 @@ class Scanner():
         if self.helper.is_separator(value):
             position += 1
             return Token(TokenClass.SEPARATOR, value, line_pos, position), position
-
-        msg = "Couldn't understant '{}' in {}:{}".format(value, line_pos, position)
-        raise Exception(msg)
+        
+        self.register_error(line[position], line_pos, position)
     
     def read_operator(self, position, line_pos):
         line = self.code[line_pos]
@@ -65,8 +64,7 @@ class Scanner():
                 return Token(TokenClass.OPERATOR, value, line_pos, position), position
             return Token(TokenClass.OPERATOR, value, line_pos, position), position
         
-        msg = "Couldn't understant '{}' in {}:{}".format(value, line_pos, position)
-        raise Exception(msg)
+        self.register_error(line[position], line_pos, position)
     
     def try_read_keyword(self, position, line_pos):
         start_position = position
@@ -87,7 +85,7 @@ class Scanner():
         lexeme = ""
 
         if line[position].isdigit():
-            raise Exception("Could not understand '{}' in {}:{}".format(line[position], line_pos, position))
+            self.register_error(line[position], line_pos, position)
 
         while position < len(line) and (line[position].isalpha() or line[position].isdigit()):
             lexeme += line[position]
@@ -103,6 +101,10 @@ class Scanner():
         for tk in self.tokens:
             print("{} \t{} \t {}:{}".format(tk.token_class.name.ljust(width), tk.value.ljust(width), tk.line, tk.column))
 
+    def register_error(self, lexeme, line, col):
+        msg = "Could not understand '{}' in {}:{}".format(lexeme, line, col)
+        self.error_list.append(msg)
+        
     def scan(self):
         line_pos = 0
         for line in self.code:
@@ -137,6 +139,13 @@ class Scanner():
                         self.tokens.append(token)
                     else:
                         self.tokens.append(token)
+                else:
+                    self.register_error(line[read_pos], line_pos, read_pos)
+                    read_pos += 1
             line_pos += 1
-        self.show_tokens()
-        print(self.symbolTable)
+        if self.error_list:
+            for err in self.error_list:
+                print(err)
+        else:
+            self.show_tokens()
+            print(self.symbolTable)

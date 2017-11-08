@@ -55,7 +55,6 @@ class PatternHelpers():
         return char in separators
 
     def is_operator(self, char):
-        #TODO: add 'and', 'or' and 'not'
         operators = ["+", "-", "*", "/", "%", "?", ">", "<", "=", ">=", "<=",
                      "==", "!", "+=", "-=", "*=", "/=", "++", "--"]
         return char in operators
