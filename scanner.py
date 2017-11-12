@@ -11,6 +11,7 @@ class Scanner():
         self.tokens = []
         self.symbolTable = SymbolTable()
         self.error_list = []
+        self.last_token = 0
     
     def read_numconst(self, position, line_pos):
         value = ""
@@ -37,7 +38,8 @@ class Scanner():
         if position < len(line) and line[position] == "'":
             return Token(TokenClass.CHARCONST, value, line_pos, position), position + 1
         else:
-            self.register_error(line[position], line_pos, position)
+            self.register_error(line[position - 1], line_pos, position)
+            return None, position + 1
 
     def read_blank(self, position, line):
         while position < len(line) and self.helper.is_blank(line[position]):
@@ -84,7 +86,7 @@ class Scanner():
         line = self.code[line_pos]
         lexeme = ""
 
-        if line[position].isdigit():
+        if position < len(line) and line[position].isdigit():
             self.register_error(line[position], line_pos, position)
 
         while position < len(line) and (line[position].isalpha() or line[position].isdigit()):
@@ -96,14 +98,13 @@ class Scanner():
         self.symbolTable.store(token)
         return token, position
 
-    def show_tokens(self):
-        width = max(len(tk.token_class.name) for tk in self.tokens)
-        for tk in self.tokens:
-            print("{} \t{} \t {}:{}".format(tk.token_class.name.ljust(width), tk.value.ljust(width), tk.line, tk.column))
-
     def register_error(self, lexeme, line, col):
-        msg = "Could not understand '{}' in {}:{}".format(lexeme, line, col)
+        msg = "Could not understand '{}' near {}:{}".format(lexeme, line, col)
         self.error_list.append(msg)
+    
+    def next_token(self):
+        self.last_token += 1
+        return self.tokens[self.last_token]
         
     def scan(self):
         line_pos = 0
@@ -119,7 +120,8 @@ class Scanner():
                 
                 elif line[read_pos] == "'":
                     token, read_pos = self.read_charconst(read_pos, line_pos)
-                    self.tokens.append(token)
+                    if token is not None:
+                        self.tokens.append(token)
                 
                 elif self.helper.is_separator(line[read_pos]):
                     token, read_pos = self.read_separator(read_pos, line_pos)
@@ -143,9 +145,9 @@ class Scanner():
                     self.register_error(line[read_pos], line_pos, read_pos)
                     read_pos += 1
             line_pos += 1
+        
         if self.error_list:
             for err in self.error_list:
                 print(err)
         else:
-            self.show_tokens()
             print(self.symbolTable)
