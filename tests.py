@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from language import TokenClass
+from language import TokenClass, SymbolTable
 from scanner import Scanner
 
 class TestScanner(unittest.TestCase):
 
+    def get_scanner(self, mock_code):
+        symbol_table = SymbolTable()
+        return Scanner(mock_code, symbol_table)
+
     def test_can_read_valid_numconst(self):
         mock_code = ["1"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         
         token, new_pos = scanner.read_numconst(0, 0)
         self.assertEqual(token.token_class, TokenClass.NUMCONST)
@@ -16,7 +20,7 @@ class TestScanner(unittest.TestCase):
     
     def test_can_read_many_numconst(self):
         mock_code = ["12 35 99"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         
         scanner.scan()
         self.assertEqual(len(scanner.tokens), 3)
@@ -26,7 +30,7 @@ class TestScanner(unittest.TestCase):
     
     def test_can_read_numconst_multiple_lines(self):
         mock_code = ["12 35","99"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         
         scanner.scan()
         self.assertEqual(len(scanner.tokens), 3)
@@ -36,21 +40,21 @@ class TestScanner(unittest.TestCase):
     
     def test_can_read_charconst(self):
         mock_code = ["'a'"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         
         token, new_pos = scanner.read_charconst(0, 0)
         self.assertEqual(token.token_class, TokenClass.CHARCONST)
     
     def test_cant_read_charconst_without_quotes(self):
         mock_code = ["'a"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         scanner.scan()
         self.assertNotEqual(scanner.error_list, [])
         self.assertEqual(len(scanner.error_list), 1)
     
     def test_can_read_charconst_multiple_lines(self):
         mock_code = ["'a' 'b'","'c'"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         
         scanner.scan()
         self.assertEqual(len(scanner.tokens), 3)
@@ -60,7 +64,7 @@ class TestScanner(unittest.TestCase):
     
     def test_can_read_charconst_empty(self):
         mock_code = ["''"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
 
         token, new_pos = scanner.read_charconst(0, 0)
         self.assertEqual(token.token_class, TokenClass.CHARCONST)
@@ -68,14 +72,14 @@ class TestScanner(unittest.TestCase):
     
     def test_can_read_separator(self):
         mock_code = [","]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
 
         token, new_pos = scanner.read_separator(0, 0)
         self.assertEqual(TokenClass.SEPARATOR, token.token_class)
     
     def test_can_read_separators_multiple_lines(self):
         mock_code = [",", ";", "{"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         scanner.scan()
         
         self.assertEqual(len(scanner.tokens), 3)
@@ -85,7 +89,7 @@ class TestScanner(unittest.TestCase):
     
     def test_can_read_separators_multiple_lines(self):
         mock_code = [", { ( } ) ] ; . ["]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         scanner.scan()
         
         self.assertEqual(len(scanner.tokens), 9)
@@ -101,21 +105,21 @@ class TestScanner(unittest.TestCase):
     
     def test_can_read_operator(self):
         mock_code = ["="]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         
         token, new_pos = scanner.read_operator(0, 0)
         self.assertEqual(TokenClass.OPERATOR, token.token_class)
     
     def test_can_read_2part_operator(self):
         mock_code = ["+="]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
 
         token, new_pos = scanner.read_operator(0, 0)
         self.assertEqual(TokenClass.OPERATOR, token.token_class)
     
     def test_can_read_multiple_operators(self):
         mock_code = ["+ *= >= ?"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         scanner.scan()
 
         self.assertEqual(len(scanner.tokens), 4)
@@ -126,7 +130,7 @@ class TestScanner(unittest.TestCase):
     
     def test_can_read_logical_operators(self):
         mock_code = ["and"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         scanner.scan()
 
         self.assertEqual(len(scanner.tokens), 1)
@@ -134,7 +138,7 @@ class TestScanner(unittest.TestCase):
     
     def test_can_read_multiple_operators(self):
         mock_code = ["- /", "== <="]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         scanner.scan()
 
         self.assertEqual(len(scanner.tokens), 4)
@@ -145,7 +149,7 @@ class TestScanner(unittest.TestCase):
     
     def test_can_read_multiple_logical_operators(self):
         mock_code = ["and", "or", "not and"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         scanner.scan()
 
         self.assertEqual(len(scanner.tokens), 4)
@@ -156,7 +160,7 @@ class TestScanner(unittest.TestCase):
 
     def test_can_ignore_comments(self):
         mock_code = ["123 //id do usuario"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         scanner.scan()
 
         self.assertEqual(len(scanner.tokens), 1)
@@ -164,7 +168,7 @@ class TestScanner(unittest.TestCase):
     
     def test_can_read_keyword(self):
         mock_code = ["static"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
 
         token, pos = scanner.try_read_keyword(0, 0)
         self.assertNotEqual(token, None)
@@ -172,7 +176,7 @@ class TestScanner(unittest.TestCase):
     
     def test_can_read_multiple_keywords(self):
         mock_code = ["static int if else"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         scanner.scan()
 
         self.assertEqual(len(scanner.tokens), 4)
@@ -183,7 +187,7 @@ class TestScanner(unittest.TestCase):
     
     def test_can_read_keywords_multiple_lines(self):
         mock_code = ["static int", "if else"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         scanner.scan()
 
         self.assertEqual(len(scanner.tokens), 4)
@@ -194,21 +198,21 @@ class TestScanner(unittest.TestCase):
     
     def test_can_read_id(self):
         mock_code = ["teste"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         
         token, pos = scanner.try_read_id(0, 0)
         self.assertEqual(token.token_class, TokenClass.ID)
     
     def test_can_read_id_with_numbers(self):
         mock_code = ["teste112"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         
         token, pos = scanner.try_read_id(0, 0)
         self.assertEqual(token.token_class, TokenClass.ID)
     
     def test_can_read_multiple_id(self):
         mock_code = ["teste112 abc12"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         scanner.scan()
         
         self.assertEqual(len(scanner.tokens), 2)
@@ -217,7 +221,7 @@ class TestScanner(unittest.TestCase):
     
     def test_can_read_multiple_lines_id(self):
         mock_code = ["teste112 abc12", "sim123"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         scanner.scan()
         
         self.assertEqual(len(scanner.tokens), 3)
@@ -227,18 +231,18 @@ class TestScanner(unittest.TestCase):
     
     # def test_cant_read_id_starting_with_number(self):
     #     mock_code = ["112andre"]
-    #     scanner = Scanner(mock_code)
+    #     scanner = self.get_scanner(mock_code)
         
     #     with self.assertRaises(Exception):
     #         scanner.scan()
     
     def test_can_store_symbol_table(self):
         mock_code = ["identifier"]
-        scanner = Scanner(mock_code)
+        scanner = self.get_scanner(mock_code)
         scanner.scan()
 
-        self.assertEqual(scanner.symbolTable.lookup("identifier").token_class, TokenClass.ID)
-        self.assertEqual(len(scanner.symbolTable.hashtable), 1)
+        self.assertEqual(scanner.symbol_table.lookup("identifier").token_class, TokenClass.ID)
+        self.assertEqual(len(scanner.symbol_table.hashtable), 1)
 
 if __name__ == '__main__':
     unittest.main()

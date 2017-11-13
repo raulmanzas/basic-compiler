@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from language import Token, TokenClass, PatternHelpers, SymbolTable
+from language import Token, TokenClass, PatternHelpers
 
 class Scanner():
-    def __init__(self, source_code):
+    def __init__(self, source_code, symbol_table):
         if len(source_code) == 0:
             raise Exception("Source code file is empty")
+        
         self.helper = PatternHelpers()
         self.code = source_code
         self.tokens = []
-        self.symbolTable = SymbolTable()
+        self.symbol_table = symbol_table
         self.error_list = []
         self.last_token = 0
     
@@ -95,7 +96,7 @@ class Scanner():
         
         # creates and stores the token in the symbol table
         token = Token(TokenClass.ID, lexeme, line_pos, position)
-        self.symbolTable.store(token)
+        self.symbol_table.store(token)
         return token, position
 
     def register_error(self, lexeme, line, col):
@@ -150,4 +151,4 @@ class Scanner():
             for err in self.error_list:
                 print(err)
         else:
-            print(self.symbolTable)
+            print(self.symbol_table)

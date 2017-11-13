@@ -4,6 +4,8 @@
 
 import argparse
 from scanner import Scanner
+from parser import Parser
+from language import SymbolTable
 
 def main(source_path):
     # All exceptions should be captured here
@@ -11,9 +13,17 @@ def main(source_path):
         with open(source_path) as source:
             code = source.readlines()
         source.close()
-        lexer = Scanner(code)
+        symbol_table = SymbolTable()
+        lexer = Scanner(code, symbol_table)
         lexer.scan()
-        
+
+        if len(lexer.error_list) > 0:
+            #TODO: Print error list in a nice way
+            print("Lexical erros encountered!!")
+        else:
+            parser = Parser(symbol_table, lexer)
+            parser.parse()
+            print("Done!")
     except Exception as e:
         print(e)
 
@@ -27,5 +37,5 @@ if __name__ == '__main__':
         main(args.file)
     else:
         #debug only
-        main("./testfiles/errors.c")
-        print("You must supply a C- source code file!")
+        main("./testfiles/full_program.c")
+        # print("You must supply a C- source code file!")

@@ -1,0 +1,79 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+CHARCONST	../language.py	/^    CHARCONST = 3$/;"	kind:variable	line:8
+ID	../language.py	/^    ID = 1$/;"	kind:variable	line:6
+KEYWORD	../language.py	/^    KEYWORD = 4$/;"	kind:variable	line:9
+NUMCONST	../language.py	/^    NUMCONST = 2$/;"	kind:variable	line:7
+OPERATOR	../language.py	/^    OPERATOR = 5$/;"	kind:variable	line:10
+Parser	../parser.py	/^class Parser():$/;"	kind:class	line:3
+PatternHelpers	../language.py	/^class PatternHelpers():$/;"	kind:class	line:47
+SEPARATOR	../language.py	/^    SEPARATOR = 6$/;"	kind:variable	line:11
+Scanner	../scanner.py	/^class Scanner():$/;"	kind:class	line:5
+SymbolTable	../language.py	/^class SymbolTable():$/;"	kind:class	line:74
+TestScanner	../tests.py	/^class TestScanner(unittest.TestCase):$/;"	kind:class	line:7
+Token	../language.py	/^class Token():$/;"	kind:class	line:31
+TokenClass	../language.py	/^class TokenClass(Enum):$/;"	kind:class	line:5
+__init__	../language.py	/^    def __init__(self):$/;"	kind:member	line:75
+__init__	../language.py	/^    def __init__(self, token_class, value, line, column):$/;"	kind:member	line:32
+__init__	../parser.py	/^    def __init__(self, symbol_table, scanner):$/;"	kind:member	line:4
+__init__	../scanner.py	/^    def __init__(self, source_code):$/;"	kind:member	line:6
+__repr__	../language.py	/^    def __repr__(self):$/;"	kind:member	line:44
+__str__	../language.py	/^    def __str__(self):$/;"	kind:member	line:13
+__str__	../language.py	/^    def __str__(self):$/;"	kind:member	line:40
+__str__	../language.py	/^    def __str__(self):$/;"	kind:member	line:87
+args	../cminus.py	/^    args = parser.parse_args()$/;"	kind:variable	line:24
+cminus.py	../cminus.py	1;"	kind:file	line:1
+is_blank	../language.py	/^    def is_blank(self, char):$/;"	kind:member	line:49
+is_comment	../language.py	/^    def is_comment(self, line, read_pos):$/;"	kind:member	line:66
+is_keyword	../language.py	/^    def is_keyword(self, lexeme):$/;"	kind:member	line:69
+is_logical_operator	../language.py	/^    def is_logical_operator(self, lexeme):$/;"	kind:member	line:62
+is_operator	../language.py	/^    def is_operator(self, char):$/;"	kind:member	line:57
+is_separator	../language.py	/^    def is_separator(self, char):$/;"	kind:member	line:53
+language.py	../language.py	1;"	kind:file	line:1
+lookup	../language.py	/^    def lookup(self, value):$/;"	kind:member	line:82
+main	../cminus.py	/^def main(source_path):$/;"	kind:function	line:8
+next_token	../scanner.py	/^    def next_token(self):$/;"	kind:member	line:105
+parser	../cminus.py	/^    parser = argparse.ArgumentParser()$/;"	kind:variable	line:22
+parser.py	../parser.py	1;"	kind:file	line:1
+read_blank	../scanner.py	/^    def read_blank(self, position, line):$/;"	kind:member	line:44
+read_charconst	../scanner.py	/^    def read_charconst(self, position, line_pos):$/;"	kind:member	line:28
+read_numconst	../scanner.py	/^    def read_numconst(self, position, line_pos):$/;"	kind:member	line:16
+read_operator	../scanner.py	/^    def read_operator(self, position, line_pos):$/;"	kind:member	line:58
+read_separator	../scanner.py	/^    def read_separator(self, position, line_pos):$/;"	kind:member	line:49
+register_error	../scanner.py	/^    def register_error(self, lexeme, line, col):$/;"	kind:member	line:101
+scan	../scanner.py	/^    def scan(self):$/;"	kind:member	line:109
+scanner.py	../scanner.py	1;"	kind:file	line:1
+store	../language.py	/^    def store(self, token):$/;"	kind:member	line:78
+test_can_ignore_comments	../tests.py	/^    def test_can_ignore_comments(self):$/;"	kind:member	line:157
+test_can_read_2part_operator	../tests.py	/^    def test_can_read_2part_operator(self):$/;"	kind:member	line:109
+test_can_read_charconst	../tests.py	/^    def test_can_read_charconst(self):$/;"	kind:member	line:37
+test_can_read_charconst_empty	../tests.py	/^    def test_can_read_charconst_empty(self):$/;"	kind:member	line:61
+test_can_read_charconst_multiple_lines	../tests.py	/^    def test_can_read_charconst_multiple_lines(self):$/;"	kind:member	line:51
+test_can_read_id	../tests.py	/^    def test_can_read_id(self):$/;"	kind:member	line:195
+test_can_read_id_with_numbers	../tests.py	/^    def test_can_read_id_with_numbers(self):$/;"	kind:member	line:202
+test_can_read_keyword	../tests.py	/^    def test_can_read_keyword(self):$/;"	kind:member	line:165
+test_can_read_keywords_multiple_lines	../tests.py	/^    def test_can_read_keywords_multiple_lines(self):$/;"	kind:member	line:184
+test_can_read_logical_operators	../tests.py	/^    def test_can_read_logical_operators(self):$/;"	kind:member	line:127
+test_can_read_many_numconst	../tests.py	/^    def test_can_read_many_numconst(self):$/;"	kind:member	line:17
+test_can_read_multiple_id	../tests.py	/^    def test_can_read_multiple_id(self):$/;"	kind:member	line:209
+test_can_read_multiple_keywords	../tests.py	/^    def test_can_read_multiple_keywords(self):$/;"	kind:member	line:173
+test_can_read_multiple_lines_id	../tests.py	/^    def test_can_read_multiple_lines_id(self):$/;"	kind:member	line:218
+test_can_read_multiple_logical_operators	../tests.py	/^    def test_can_read_multiple_logical_operators(self):$/;"	kind:member	line:146
+test_can_read_multiple_operators	../tests.py	/^    def test_can_read_multiple_operators(self):$/;"	kind:member	line:116
+test_can_read_multiple_operators	../tests.py	/^    def test_can_read_multiple_operators(self):$/;"	kind:member	line:135
+test_can_read_numconst_multiple_lines	../tests.py	/^    def test_can_read_numconst_multiple_lines(self):$/;"	kind:member	line:27
+test_can_read_operator	../tests.py	/^    def test_can_read_operator(self):$/;"	kind:member	line:102
+test_can_read_separator	../tests.py	/^    def test_can_read_separator(self):$/;"	kind:member	line:69
+test_can_read_separators_multiple_lines	../tests.py	/^    def test_can_read_separators_multiple_lines(self):$/;"	kind:member	line:76
+test_can_read_separators_multiple_lines	../tests.py	/^    def test_can_read_separators_multiple_lines(self):$/;"	kind:member	line:86
+test_can_read_valid_numconst	../tests.py	/^    def test_can_read_valid_numconst(self):$/;"	kind:member	line:9
+test_can_store_symbol_table	../tests.py	/^    def test_can_store_symbol_table(self):$/;"	kind:member	line:235
+test_cant_read_charconst_without_quotes	../tests.py	/^    def test_cant_read_charconst_without_quotes(self):$/;"	kind:member	line:44
+tests.py	../tests.py	1;"	kind:file	line:1
+try_read_id	../scanner.py	/^    def try_read_id(self, position, line_pos):$/;"	kind:member	line:85
+try_read_keyword	../scanner.py	/^    def try_read_keyword(self, position, line_pos):$/;"	kind:member	line:71
+validate	../language.py	/^    def validate(classes, value):$/;"	kind:member	line:17
