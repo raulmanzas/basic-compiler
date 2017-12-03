@@ -12,7 +12,7 @@ class Scanner():
         self.tokens = []
         self.symbol_table = symbol_table
         self.error_list = []
-        self.last_token = 0
+        self.last_token = -1
     
     def read_numconst(self, position, line_pos):
         value = ""
@@ -103,9 +103,6 @@ class Scanner():
         msg = "Could not understand '{}' near {}:{}".format(lexeme, line, col)
         self.error_list.append(msg)
     
-    def next_token(self):
-        self.last_token += 1
-        return self.tokens[self.last_token]
         
     def scan(self):
         line_pos = 0
@@ -152,3 +149,17 @@ class Scanner():
                 print(err)
         else:
             print(self.symbol_table)
+    
+    def next_token(self):
+        self.last_token += 1
+        return self.tokens[self.last_token]
+
+    def see_next_token(self):
+        next_position = self.last_token + 1
+        if next_position < len(self.tokens):
+            return self.tokens[next_position]
+        return None
+
+    def get_token_in(self, position):
+        if position < len(self.tokens):
+            return self.tokens[position]

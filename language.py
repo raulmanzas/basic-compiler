@@ -71,6 +71,10 @@ class PatternHelpers():
                      "else", "while", "return", "break", "true", "false"]
         return lexeme in keywords
 
+    def is_data_type(self, lexeme):
+        types = ["int", "char", "bool"]
+        return lexeme in types
+
 class SymbolTable():
     def __init__(self):
         self.hashtable = {}
@@ -90,3 +94,58 @@ class SymbolTable():
             representation += "Key: {} \n".format(key)
         
         return representation
+
+class SyntaxNodeTypes(Enum):
+    PROGRAM = 1,
+    DECLARATION_LIST = 2,
+    DECLARATION = 3,
+    REC_DECLARATION = 4,
+    VAR_DECLARATION = 5,
+    SCOPED_VAR_DECLARATION = 6,
+    VAR_DEC_LIST = 7,
+    VAR_DEC_INITIALIZE = 8,
+    VAR_DEC_ID = 9,
+    SCOPED_TYPE_SPECIFIER = 10,
+    TYPE_SPECIFIER = 11,
+    RETURN_TYPE_SPECIFIER = 12,
+    FUN_DECLARATION = 13,
+    PARAMS = 14,
+    PARAM_LIST = 15,
+    PARAM_TYPE_LIST = 16,
+    PARAM_ID_LIST = 17,
+    PARAM_ID = 18,
+    STATEMENT = 19,
+    COMPOUND_STATEMENT = 20,
+    LOCAL_DECLARATIONS = 21,
+    STATEMENT_LIST = 22,
+    EXPRESSION_STATEMENT = 23,
+    SELECTION_STATEMENT = 24,
+    ITERATION_STATEMENT = 25,
+    RETURN_STATEMENT = 26,
+    BREAK_STATEMENT = 27,
+    EXPRESSION = 28,
+    SIMPLE_EXPRESSION = 29,
+    AND_EXPRESSION = 30,
+    UNARY_REL_EXPRESSION = 31,
+    REL_EXPRESSION = 32,
+    RELOP = 33,
+    SUM_EXPRESSION = 34,
+    SUMOP = 35,
+    TERM = 36,
+    MULOP = 37,
+    UNARY_EXPRESSION = 38,
+    UNARY_OP = 39,
+    FACTOR = 40,
+    MUTABLE = 41,
+    IMMUTABLE = 42,
+    CALL = 43,
+    ARGS = 44,
+    ARG_LIST = 45,
+    CONSTANT = 46
+
+class SyntaxNode():
+    def __init__(self, node_type):
+        if not node_type:
+            Exception("Syntax Tree node type does is invalid!")
+        
+        self.type = node_type

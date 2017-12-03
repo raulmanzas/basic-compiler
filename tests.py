@@ -3,6 +3,7 @@
 import unittest
 from language import TokenClass, SymbolTable
 from scanner import Scanner
+from parser import Parser
 
 class TestScanner(unittest.TestCase):
 
@@ -243,6 +244,20 @@ class TestScanner(unittest.TestCase):
 
         self.assertEqual(scanner.symbol_table.lookup("identifier").token_class, TokenClass.ID)
         self.assertEqual(len(scanner.symbol_table.hashtable), 1)
+
+class TestParser(unittest.TestCase):
+
+    def get_parser(self, mock_code):
+        symbol_table = SymbolTable()
+        scanner = Scanner(mock_code, symbol_table)
+        scanner.scan()
+        parser = Parser(symbol_table, scanner)
+        return parser
+
+    def test_can_parse_var_declaration(self):
+        mock_code = ["record point{ int x, y;}"]
+        parser = self.get_parser(mock_code)
+        parser.parse()
 
 if __name__ == '__main__':
     unittest.main()
