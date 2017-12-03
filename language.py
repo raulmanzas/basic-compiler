@@ -59,6 +59,14 @@ class PatternHelpers():
                      "==", "!", "+=", "-=", "*=", "/=", "++", "--"]
         return char in operators
 
+    def is_unary_operator(self, char):
+        unary_operators = ["-", "*", "?"]
+        return char in unary_operators
+
+    def is_relational_operator(self, char):
+        relational_operators = ["<=", "<", ">", ">=", "==", "!="]
+        return char in relational_operators
+
     def is_logical_operator(self, lexeme):
         operators = ["and", "or", "not"]
         return lexeme in operators
@@ -148,7 +156,11 @@ class SyntaxNodeTypes(Enum):
     LIST_ID_PARAM = 50,
     ID_PARAM = 51,
     LIST_VAR_DECL = 52,
-    ID_DECL_VAR = 53
+    ID_DECL_VAR = 53,
+    INITIALIZE_DECL_VAR = 54,
+    EXPRESSION_SIMPLE = 55,
+    EXPRESISON_AND = 56,
+    EXPRESSION_REL = 57
 
 class SyntaxNode():
     def __init__(self, node_type):

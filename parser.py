@@ -139,6 +139,20 @@ class Parser():
         node.list_var_decl = self.list_var_decl()
         return node
 
+    def var_decl_initialize(self):
+        node = SyntaxNode(SyntaxNodeTypes.VAR_DEC_INITIALIZE)
+        node.var_decl_id = self.var_decl_id()
+        node.initialize_decl_var = self.initialize_decl_var()
+        return node
+
+    def initialize_decl_var(self):
+        node = SyntaxNode(SyntaxNodeTypes.INITIALIZE_DECL_VAR)
+        if self.current_token.value == ":":
+            self.current_token = self.scanner.next_token()
+            node.simple_expression = self.simple_expression()
+            return node
+        return node
+
     def var_decl_id(self):
         node = SyntaxNode(SyntaxNodeTypes.VAR_DEC_ID)
         self.register_error_if_next_is_not(expected_class=TokenClass.ID)
@@ -261,4 +275,133 @@ class Parser():
         
         if len(list_params) > 0:
             node.list_param = list_params
+        return node
+
+    def constant(self):
+        node = SyntaxNode(SyntaxNodeTypes.CONSTANT)
+        if self.current_token.token_class == TokenClass.NUMCONST:
+            node.num_const = self.current_token
+            return node
+        if self.current_token.token_class == TokenClass.CHARCONST:
+            node.char_const = self.current_token
+            return node
+        if self.current_token.value == "true" or self.current_token.value == "false":
+            node.boolean = self.current_token
+            return node
+        self.register_error(self.current_token, "data literal")
+        return None
+    
+    def arg_list(self):
+        node = SyntaxNode(SyntaxNodeTypes.ARG_LIST)
+        node.expression = self.expression()
+        node.list_arg = self.list_arg()
+        return node
+
+    def call(self):
+        node = SyntaxNode(SyntaxNodeTypes.CALL)
+        if self.current_token.token_class != TokenClass.ID:
+            self.register_error(self.current_token, "identifier")
+        else:
+            node.id = self.current_token
+        self.current_token = self.scanner.next_token()
+        self.register_error_if_next_is_not("(")
+        node.args = self.args()
+        self.register_error_if_next_is_not(")")
+        return node
+
+    def args(self):
+        node = SyntaxNode(SyntaxNodeTypes.ARGS)
+        if self.current_token.token_class == TokenClass.ID:
+            node.arg_list = self.arg_list()
+            self.current_token = self.scanner.next_token()
+        return node
+
+    def break_statement(self):
+        node = SyntaxNode(SyntaxNodeTypes.BREAK_STATEMENT)
+        if self.current_token.value == "break":
+            node.break_statement = self.current_token
+            self.register_error_if_next_is_not(";")
+            return node
+
+        self.register_error(self.current_token, "break statement")
+        return node
+
+    def simple_expression(self):
+        node = SyntaxNode(SyntaxNodeTypes.SIMPLE_EXPRESSION)
+        node.and_expression = self.and_expression()
+        node.expression_simple = self.expression_simple()
+        return node
+
+    def expression_simple(self):
+        node = SyntaxNode(SyntaxNodeTypes.EXPRESSION_SIMPLE)
+        exprs = []
+        while self.current_token.value == "or":
+            node.or_op = self.current_token
+            self.current_token = self.scanner.next_token()
+            expr = self.and_expression()
+            exprs.append(expr)
+            self.current_token = self.scanner.next_token()
+        
+        if len(exprs) > 0:
+            node.expression_simple = exprs
+        return node
+
+    def and_expression(self):
+        node = SyntaxNode(SyntaxNodeTypes.AND_EXPRESSION)
+        node.unary_rel_expression = self.unary_rel_expression()
+        node.expression_and = self.expression_and()
+        return node
+
+    def expression_and(self):
+        node = SyntaxNode(SyntaxNodeTypes.EXPRESSION_AND)
+        exprs = []
+        while self.current_token.value == "and":
+            node.and_op = self.current_token
+            self.current_token = self.scanner.next_token()
+            expr = self.unary_rel_expression()
+            exprs.append(expr)
+            self.current_token = self.scanner.next_token()
+        
+        if len(exprs) > 0:
+            node.expression_and = exprs
+        return node
+
+    def unary_rel_expression(self):
+        node = SyntaxNode(SyntaxNodeTypes.UNARY_REL_EXPRESSION)
+        if self.current_token.value == "not":
+            node.not_op = self.current_token
+            self.current_token = self.scanner.next_token()
+            node.unary_rel_expression = self.unary_rel_expression()
+            return node
+
+        if self.current_token.token_class == TokenClass.ID or
+            self.helpers.is_unary_operator(self.current_token.value) or
+            self.current_token.value == "(":
+            node.rel_expression = self.rel_expression()
+            return node
+
+        self.register_error(self.current_token, "relational operator")
+        return node
+
+    def rel_expression(self):
+        node = SyntaxNode(SyntaxNodeTypes.REL_EXPRESSION)
+        node.sum_expression = self.sum_expression()
+        node.expression_rel = self.expression_rel()
+        return node
+
+    def expression_rel(self):
+        node = SyntaxNode(SyntaxNodeTypes.EXPRESSION_REL)
+        if self.helpers.is_relational_operator(self.current_token.value):
+            node.relop = self.relop()
+            node.sum_expression = self.sum_expresison()
+            return node
+        return node
+
+    def relop(self):
+        node = SyntaxNode(SyntaxNodeTypes.RELOP)
+        if self.helpers.is_relational_operator(self.current_token.value):
+            node.relop = self.current_token
+            return node
+
+        self.register_error(self.current_token, "relational operator")
         return node
