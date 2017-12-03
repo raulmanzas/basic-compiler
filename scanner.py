@@ -151,7 +151,10 @@ class Scanner():
             print(self.symbol_table)
     
     def next_token(self):
-        self.last_token += 1
+        next_token_index = self.last_token + 1
+        if next_token_index >= len(self.tokens):
+            return None
+        self.last_token = next_token_index
         return self.tokens[self.last_token]
 
     def see_next_token(self):
@@ -160,6 +163,9 @@ class Scanner():
             return self.tokens[next_position]
         return None
 
-    def get_token_in(self, position):
-        if position < len(self.tokens):
-            return self.tokens[position]
+    def prior_token(self):
+        last_position = self.last_token - 1
+        if last_position >= 0:
+            self.last_token = last_position
+            return self.tokens[self.last_token]
+        return None

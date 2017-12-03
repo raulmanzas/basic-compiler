@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from language import TokenClass, SymbolTable
+from language import TokenClass, SymbolTable, SyntaxNodeTypes
 from scanner import Scanner
 from parser import Parser
 
@@ -10,6 +10,22 @@ class TestScanner(unittest.TestCase):
     def get_scanner(self, mock_code):
         symbol_table = SymbolTable()
         return Scanner(mock_code, symbol_table)
+
+    def test_can_read_empty_code(self):
+        mock_code = [""]
+        scanner = self.get_scanner(mock_code)
+        scanner.scan()
+
+        self.assertEqual(scanner.tokens, [])
+    
+    def test_cant_read_next_token_without_source_code(self):
+        mock_code = [""]
+        scanner = self.get_scanner(mock_code)
+        token = scanner.next_token()
+        next_token = scanner.see_next_token()
+
+        self.assertIsNone(token)
+        self.assertIsNone(next_token)
 
     def test_can_read_valid_numconst(self):
         mock_code = ["1"]
@@ -254,10 +270,17 @@ class TestParser(unittest.TestCase):
         parser = Parser(symbol_table, scanner)
         return parser
 
-    def test_can_parse_var_declaration(self):
-        mock_code = ["record point{ int x, y;}"]
-        parser = self.get_parser(mock_code)
-        parser.parse()
+    # def test_can_create_program_node(self):
+    #     parser = self.get_parser([""])
+    #     program_node = parser.parse()
+
+    #     self.assertEqual(program_node.type, SyntaxNodeTypes.PROGRAM)
+    
+    # def test_can_parse_var_declaration(self):
+    #     parser = self.get_parser(["int x;"])
+    #     tree = parser.parse()
+
+    #     self.assertEqual(parser.error_list, [])
 
 if __name__ == '__main__':
     unittest.main()

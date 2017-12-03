@@ -141,7 +141,9 @@ class SyntaxNodeTypes(Enum):
     CALL = 43,
     ARGS = 44,
     ARG_LIST = 45,
-    CONSTANT = 46
+    CONSTANT = 46,
+    LIST_DECLARATION = 47,
+    DECLARATIONS_LOCAL = 48
 
 class SyntaxNode():
     def __init__(self, node_type):
