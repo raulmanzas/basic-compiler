@@ -105,7 +105,7 @@ class Parser():
     def var_declaration(self):
         node = SyntaxNodeTypes(SyntaxNodeTypes.VAR_DECLARATION)
         node.type_specifier = self.type_specifier()
-        node.var_declaration_list = self.var_declaration_list()
+        node.var_declaration_list = self.var_decl_list()
         self.register_error_if_next_is_not(";")
         return node
 
@@ -126,6 +126,57 @@ class Parser():
             node.declarations_local = declarations
         return node
 
+    def scoped_var_declaration(self):
+        node = SyntaxNode(SyntaxNodeTypes.SCOPED_VAR_DECLARATION)
+        node.scoped_type_specifier = self.scoped_type_specifier()
+        node.var_decl_list = self.var_decl_list()
+        self.register_error_if_next_is_not(";")
+        return node
+
+    def var_decl_list(self):
+        node = SyntaxNode(SyntaxNodeTypes.VAR_DEC_LIST)
+        node.var_decl_initialize = self.var_decl_initialize()
+        node.list_var_decl = self.list_var_decl()
+        return node
+
+    def var_decl_id(self):
+        node = SyntaxNode(SyntaxNodeTypes.VAR_DEC_ID)
+        self.register_error_if_next_is_not(expected_class=TokenClass.ID)
+        node.id = self.current_token
+        node.id_decl_var = self.id_decl_var()
+        return node
+
+    def id_decl_var(self):
+        node = SyntaxNode(SyntaxNodeTypes.ID_DECL_VAR)
+        if self.current_token.value == "[":
+            node.id_decl_var = self.current_token
+            self.register_error_if_next_is_not("]")
+            return node
+        return node
+
+    def list_var_decl(self):
+        node = SyntaxNode(SyntaxNodeTypes.LIST_VAR_DECL)
+        var_declarations = []
+        next_token = self.scanner.see_next_token()
+        while next_token.token_class == TokenClass.ID:
+            if self.current_token.value != ",":
+                self.register_error(self.current_token, ",")
+            self.current_token = self.scanner.next_token()
+            decl = self.var_decl_initialize()
+            var_declarations.append(decl)
+            self.current_token = self.scanner.next_token()
+        
+        if len(var_declarations) > 0:
+            node.list_var_decl = var_declarations
+        return node
+
+    def scoped_type_specifier(self):
+        node = SyntaxNode(SyntaxNodeTypes.SCOPED_TYPE_SPECIFIER)
+        if self.current_token.value == "static":
+            self.current_token = self.scanner.next_token()
+        node.type_specifier = self.type_specifier()
+        return node
+
     def type_specifier(self):
         node = SyntaxNode(SyntaxNodeTypes.TYPE_SPECIFIER)
         if self.current_token.token_class == TokenClass.ID:
@@ -144,3 +195,70 @@ class Parser():
             return node
         self.register_error(self.current_token, "data type")
         return None
+    
+    def params(self):
+        node = SyntaxNode(SyntaxNodeTypes.PARAMS)
+        node.param_list = self.param_list()
+        return node
+
+    def param_list(self):
+        if self.helpers.is_data_type(self.current_token.value):
+            node = SyntaxNode(SyntaxNodeTypes.PARAM_LIST)
+            node.param_type_list = self.param_type_list()
+            node.list_param = self.list_param()
+            return node
+        return None
+
+    def param_type_list(self):
+        node = SyntaxNode(SyntaxNodeTypes.PARAM_TYPE_LIST)
+        node.type_specifier = self.type_specifier()
+        node.param_id_list = self.param_id_list()
+        return node
+
+    def param_id_list(self):
+        node = SyntaxNode(SyntaxNodeTypes.PARAM_ID_LIST)
+        node.param_id = self.param_id()
+        node.list_id_param = self.list_id_param()
+        return node
+
+    def param_id(self):
+        node = SyntaxNode(SyntaxNodeTypes.PARAM_ID)
+        self.register_error_if_next_is_not(expected_class=TokenClass.ID)
+        node.id = self.current_token
+        node.idParam = self.id_param()
+        return node
+
+    def id_param(self):
+        node = SyntaxNode(SyntaxNodeTypes.ID_PARAM)
+        if self.current_token.value == "[":
+            self.register_error_if_next_is_not("]")
+            node.id_param = self.current_token
+            return node
+        return node
+
+    def list_id_param(self):
+        node = SyntaxNode(SyntaxNodeTypes.LIST_ID_PARAM)
+        self.register_error_if_next_is_not(",")
+        ids = []
+        while self.current_token.token_class == TokenClass.ID:
+            id_param = self.param_id()
+            ids.append(id_param)
+            self.register_error_if_next_is_not(",")
+            self.current_token = self.scanner.next_token()
+        
+        if len(ids) > 0:
+            node.list_id_param = ids
+        return node
+
+    def list_param(self):
+        node = SyntaxNode(SyntaxNodeTypes.LIST_PARAM)
+        self.register_error_if_next_is_not(";")
+        list_params = []
+        while self.helpers.is_data_type(self.current_token.value):
+            param_type_list = self.param_type_list()
+            list_params.append(param_type_list)
+            self.current_token = self.scanner.next_token()
+        
+        if len(list_params) > 0:
+            node.list_param = list_params
+        return node

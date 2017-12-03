@@ -143,7 +143,12 @@ class SyntaxNodeTypes(Enum):
     ARG_LIST = 45,
     CONSTANT = 46,
     LIST_DECLARATION = 47,
-    DECLARATIONS_LOCAL = 48
+    DECLARATIONS_LOCAL = 48,
+    LIST_PARAM = 49,
+    LIST_ID_PARAM = 50,
+    ID_PARAM = 51,
+    LIST_VAR_DECL = 52,
+    ID_DECL_VAR = 53
 
 class SyntaxNode():
     def __init__(self, node_type):
