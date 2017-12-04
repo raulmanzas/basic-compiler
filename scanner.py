@@ -153,7 +153,7 @@ class Scanner():
     def next_token(self):
         next_token_index = self.last_token + 1
         if next_token_index >= len(self.tokens):
-            return None
+            raise Exception("Source code finished!")
         self.last_token = next_token_index
         return self.tokens[self.last_token]
 

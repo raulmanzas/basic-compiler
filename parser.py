@@ -75,6 +75,8 @@ class Parser():
                     node.fun_declaration = self.fun_declaration()
                 else:
                     node.var_declaration = self.var_declaration()
+            else:
+                self.register_error(self.current_token, "identifier")
             return node
 
         self.register_error(self.current_token, "type declaration")
@@ -98,6 +100,7 @@ class Parser():
         if self.current_token.token_class == TokenClass.ID:
             node.id = self.current_token
             self.register_error_if_next_is_not("(")
+            self.current_token = self.scanner.next_token()
             node.params = self.params()
             self.register_error_if_next_is_not(")")
             node.statement = self.statement()
@@ -235,6 +238,7 @@ class Parser():
     def param_id_list(self):
         node = SyntaxNode(SyntaxNodeTypes.PARAM_ID_LIST)
         node.param_id = self.param_id()
+        self.current_token = self.scanner.next_token()
         node.list_id_param = self.list_id_param()
         return node
 
@@ -255,7 +259,6 @@ class Parser():
 
     def list_id_param(self):
         node = SyntaxNode(SyntaxNodeTypes.LIST_ID_PARAM)
-        self.register_error_if_next_is_not(",")
         ids = []
         while self.current_token.token_class == TokenClass.ID:
             id_param = self.param_id()

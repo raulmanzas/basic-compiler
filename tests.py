@@ -21,10 +21,10 @@ class TestScanner(unittest.TestCase):
     def test_cant_read_next_token_without_source_code(self):
         mock_code = [""]
         scanner = self.get_scanner(mock_code)
-        token = scanner.next_token()
         next_token = scanner.see_next_token()
-
-        self.assertIsNone(token)
+        
+        with self.assertRaises(Exception):
+            token = scanner.next_token()
         self.assertIsNone(next_token)
 
     def test_can_read_valid_numconst(self):
@@ -272,15 +272,40 @@ class TestParser(unittest.TestCase):
 
     def test_can_create_program_node(self):
         parser = self.get_parser([""])
-        program_node = parser.parse()
-
-        self.assertEqual(program_node.type, SyntaxNodeTypes.PROGRAM)
+        with self.assertRaises(Exception):
+            program_node = parser.parse()
     
     def test_can_parse_var_declaration(self):
         parser = self.get_parser(["int x;"])
         tree = parser.parse()
 
         self.assertEqual(parser.error_list, [])
+    
+    def test_can_not_parse_invalid_var_declaration(self):
+        parser = self.get_parser(["int; x"])
+        tree = parser.parse()
 
+        self.assertNotEqual(parser.error_list, [])
+        self.assertEqual(len(parser.error_list), 1)
+    
+    def test_can_not_parse_typeless_var_declaration(self):
+        parser = self.get_parser(["x;"])
+        with self.assertRaises(Exception):
+            tree = parser.parse()
+    
+    def test_can_parse_parameterless_function_declaration(self):
+        mock_code = ["int fat()\{\}"]
+        parser = self.get_parser(mock_code)
+        tree = parser.parse()
+        
+        self.assertNotEqual(parser.error_list, [])
+
+    def test_can_parse_function_declaration(self):
+        mock_code = ["int fat(char letra)\{\}"]
+        parser = self.get_parser(mock_code)
+        tree = parser.parse()
+
+        self.assertNotEqual(parser.error_list, [])
+        
 if __name__ == '__main__':
     unittest.main()
