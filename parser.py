@@ -27,6 +27,9 @@ class Parser():
     def parse(self):
         self.current_token = self.scanner.next_token()
         node = SyntaxNode(SyntaxNodeTypes.PROGRAM)
+        #empty source code should return just the root node
+        if self.current_token == None:
+            return node
         node.declaration_list = self.declaration_list()
         return node
     
@@ -297,6 +300,18 @@ class Parser():
         node.list_arg = self.list_arg()
         return node
 
+    def list_arg(self):
+        node = SyntaxNode(SyntaxNodeTypes.LIST_ARG)
+        expressions = []
+        while self.current_token.value == ",":
+            self.current_token = self.scanner.next_token()
+            expression = self.expression()
+            expressions.append(expression)
+            self.current_token = self.scanner.next_token()
+        
+        if len(expressions) > 0:
+            node.expression = expressions
+        return node
     def call(self):
         node = SyntaxNode(SyntaxNodeTypes.CALL)
         if self.current_token.token_class != TokenClass.ID:
@@ -374,9 +389,7 @@ class Parser():
             node.unary_rel_expression = self.unary_rel_expression()
             return node
 
-        if self.current_token.token_class == TokenClass.ID or
-            self.helpers.is_unary_operator(self.current_token.value) or
-            self.current_token.value == "(":
+        if self.helpers.is_rel_expression_token(self.current_token):
             node.rel_expression = self.rel_expression()
             return node
 
@@ -405,3 +418,286 @@ class Parser():
 
         self.register_error(self.current_token, "relational operator")
         return node
+
+    def unary_op(self):
+        node = SyntaxNode(SyntaxNodeTypes.UNARY_OP)
+        if self.helpers.is_unary_operator(self.current_token.value):
+            node.unary_op = self.current_token
+            self.current_token = self.scanner.next_token()
+            return node
+        
+        self.register_error(self.current_token, "unary operator")
+        return node
+
+    def mulop(self):
+        node = SyntaxNode(SyntaxNodeTypes.MULOP)
+        if self.helpers.is_mulop(self.current_token.value):
+            node.mulop = self.current_token
+            self.current_token = self.scanner.next_token()
+            return node
+        
+        self.register_error(self.current_token, "multiplication operator")
+        return node
+
+    def sumop(self):
+        node = SyntaxNode(SyntaxNodeTypes.SUMOP)
+        if self.helpers.is_sumop(self.current_token.value):
+            node.sumop = self.current_token
+            self.current_token = self.scanner.next_token()
+            return node
+        
+        self.register_error(self.current_token, "summation operator")
+        return node
+
+    def immutable(self):
+        node = SyntaxNode(SyntaxNodeTypes.IMMUTABLE)
+        if self.current_token.value == "(":
+            node.expression = self.expression()
+            self.register_error_if_next_is_not(")")
+            return node
+        elif self.current_token.token_class == TokenClass.ID:
+            node.call = self.call()
+            return node
+        elif self.helpers.is_constant_token(self.current_token):
+            node.constant = self.constant()
+            return node
+        else:
+            self.register_error(self.current_token, "immutable expression")
+            return node
+
+    def mutable(self):
+        node = SyntaxNode(SyntaxNodeTypes.MUTABLE)
+        if self.current_token.token_class == TokenClass.ID:
+            node.id = self.current_token
+            self.current_token = self.scanner.next_token()
+            node.new_mutable = self.new_mutable()
+            return node
+
+        self.register_error(self.current_token, "identification")
+        return node
+
+    def new_mutable(self):
+        node = SyntaxNode(SyntaxNodeTypes.NEW_MUTABLE)
+        ids = []
+        expressions = []
+        while self.current_token.value == "[" or self.current_token.value == ".":
+            if self.current_token.value == "[":
+                expression = self.expression()
+                expressions.append(expression)
+                self.register_error_if_next_is_not("]")
+            elif self.current_token.value == ".":
+                self.current_token = self.scanner.next_token()
+                tk_id = self.current_token
+                ids.append(tk_id)
+            self.current_token = self.scanner.next_token()
+        
+        if len(ids) > 0:
+            node.ids = ids
+        if len(expressions) > 0:
+            node.expressions = expressions
+        return node
+
+    def factor(self):
+        node = SyntaxNode(SyntaxNodeTypes.FACTOR)
+        token = self.current_token
+        if self.helpers.is_constant_token(token) or token.value == "(":
+            node.immutable = self.immutable()
+            return node
+        
+        elif self.current_token.token_class == TokenClass.ID:
+            next_token = self.scanner.see_next_token()
+            if next_token.value == "(":
+                node.immutable = self.immutable()
+                return node
+            elif next_token.value == "[" or next_token.value == ".":
+                node.mutable = self.mutable()
+                return node
+            else:
+                self.register_error(self.current_token, "mutable or immutable structure")
+                return node
+        
+    def term(self):
+        node = SyntaxNode(SyntaxNodeTypes.TERM)
+        node.unary_expression = self.unary_expression()
+        node.new_term = self.new_term()
+        return node
+
+    def new_term(self):
+        node = SyntaxNode(SyntaxNodeTypes.NEW_TERM)
+        ops = []
+        unary_expressions = []
+        while self.helpers.is_mulop(self.current_token.value):
+            op = self.mulop()
+            ops.append(op)
+            unary_expression = self.unary_expression()
+            unary_expressions.append(unary_expression)
+            self.current_token = self.scanner.next_token()
+        
+        if len(ops) > 0:
+            node.mulop = ops
+        if len(unary_expressions) > 0:
+            node.unary_expression = unary_expressions
+        return node
+
+    def unary_expression(self):
+        node = SyntaxNode(SyntaxNodeTypes.UNARY_EXPRESSION)
+        ops = []
+        if self.helpers.is_unary_operator(self.current_token.value):
+            while self.helpers.is_unary_operator(self.current_token.value):
+                op = self.unary_op()
+                ops.append(op)
+                self.current_token = self.scanner.next_token()
+            if len(ops) > 0:
+                node.unary_op = ops
+        else:
+            node.factor = self.factor()
+        return node
+
+    def sum_expression(self):
+        node = SyntaxNode(SyntaxNodeTypes.SUM_EXPRESSION)
+        node.term = self.term()
+        node.expression_sum = self.expression_sum()
+        return node
+
+    def expression_sum(self):
+        node = SyntaxNode(SyntaxNodeTypes.EXPRESSION_SUM)
+        ops = []
+        terms = []
+        while self.helpers.is_sumop(self.current_token.value):
+            op = self.sumop()
+            ops.append(op)
+            term = self.term()
+            terms.append(term)
+            self.current_token = self.scanner.next_token()
+        
+        if len(ops) > 0:
+            node.sumop = ops
+        if len(terms) > 0:
+            node.term = terms
+        return node
+
+    def statement_list(self):
+        node = SyntaxNode(SyntaxNodeTypes.STATEMENT_LIST)
+        node.list_statement = self.list_statement()
+        return node
+
+    def expression_stmt(self):
+        node = SyntaxNode(SyntaxNodeTypes.EXPRESSION_STATEMENT)
+        if self.current_token.value == ";":
+            node.expression = self.current_token
+            return node
+        elif self.current_token.token_class == TokenClass.ID:
+            node.expression = self.expression()
+            return node
+        else:
+            self.register_error(self.current_token, "; or identifier")
+            return node
+    
+    def compound_stmt(self):
+        node = SyntaxNode(SyntaxNodeTypes.COMPOUND_STATEMENT)
+        self.register_error_if_next_is_not("{")
+        node.local_declarations = self.local_declarations()
+        node.statement_list = self.statement_list()
+        self.register_error_if_next_is_not("}")
+        return node
+
+    def selection_stmt(self):
+        node = SyntaxNode(SyntaxNodeTypes.SELECTION_STATEMENT)
+        self.register_error_if_next_is_not("if")
+        self.register_error_if_next_is_not("(")
+        node.simple_expression = self.simple_expression()
+        self.register_error_if_next_is_not(")")
+        node.statement = self.statement()
+        node.stmt_selection = self.stmt_selection()
+        return node
+
+    def stmt_selection(self):
+        node = SyntaxNode(SyntaxNodeTypes.STATEMENT_SELECTION)
+        if self.current_token.value == "else":
+            self.current_token = self.scanner.next_token()
+            node.statement = self.statement()
+            return node
+        return node
+
+    def return_statement(self):
+        node = SyntaxNode(SyntaxNodeTypes.RETURN_STATEMENT)
+        if self.current_token.value != "return":
+            self.register_error(self.current_token, "return")
+        self.current_token = self.scanner.next_token()
+        
+        if self.current_token.value == ";":
+            return node
+        else:
+            node.expression = self.expression()
+            if self.current_token.value != ";":
+                self.register_error(self.current_token, ";")
+            self.current_token = self.scanner.next_token()
+            return node
+    
+    def iteration_stmt(self):
+        node = SyntaxNode(SyntaxNodeTypes.ITERATION_STATEMENT)
+        if self.current_token.value != "while":
+            self.register_error(self.current_token, "while statement")
+        self.register_error_if_next_is_not("(")
+        node.simple_expression = self.simple_expression()
+        self.register_error_if_next_is_not(")")
+        node.statement = self.statement()
+        return node
+
+    def list_statement(self):
+        node = SyntaxNode(SyntaxNodeTypes.LIST_STATEMENT)
+        statements = []
+        while self.helpers.is_statement_token(self.current_token):
+            statement = self.statement()
+            statements.append(statement)
+            self.current_token = self.scanner.next_token()
+        
+        if len(statements) > 0:
+            node.statement = statements
+        return node
+
+    def statement(self):
+        node = SyntaxNode(SyntaxNodeTypes.STATEMENT)
+        if self.current_token.token_class == TokenClass.ID:
+            node.expression = self.expression()
+            return node
+        if self.current_token.value == "{":
+            node.compound_stmt = self.compound_stmt()
+            return node
+        if self.current_token.value == "if":
+            node.selection_stmt = self.selection_stmt()
+            return node
+        if self.current_token.value == "while":
+            node.iteration_stmt = self.iteration_stmt()
+            return node
+        if self.current_token.value == "return":
+            node.return_statement = self.return_statement()
+            return node
+        if self.current_token.value == "break":
+            node.break_statement = self.break_statement()
+            return node
+        self.register_error(self.current_token, "valid statement")
+        return node
+
+    def expression(self):
+        node = SyntaxNode(SyntaxNodeTypes.EXPRESSION)
+        if self.current_token.token_class == TokenClass.ID:
+            next_token = self.scanner.see_next_token()
+            if self.helpers.is_contracted_operator(self.current_token.value):
+                node.op = self.current_token
+                self.current_token = self.scanner.next_token()
+                if node.op.value == "++" or node.op.value =="--":
+                    return node
+
+                node.expression = self.expression()
+                return node
+            self.register_error(self.current_token, "contracted operator")
+            return node
+        
+        if self.current_token.value == "not":
+            node.simple_expression = self.simple_expression()
+            return node
+        self.register_error(self.current_token, "expression")
+        return node
+
+

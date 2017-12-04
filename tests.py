@@ -270,17 +270,17 @@ class TestParser(unittest.TestCase):
         parser = Parser(symbol_table, scanner)
         return parser
 
-    # def test_can_create_program_node(self):
-    #     parser = self.get_parser([""])
-    #     program_node = parser.parse()
+    def test_can_create_program_node(self):
+        parser = self.get_parser([""])
+        program_node = parser.parse()
 
-    #     self.assertEqual(program_node.type, SyntaxNodeTypes.PROGRAM)
+        self.assertEqual(program_node.type, SyntaxNodeTypes.PROGRAM)
     
-    # def test_can_parse_var_declaration(self):
-    #     parser = self.get_parser(["int x;"])
-    #     tree = parser.parse()
+    def test_can_parse_var_declaration(self):
+        parser = self.get_parser(["int x;"])
+        tree = parser.parse()
 
-    #     self.assertEqual(parser.error_list, [])
+        self.assertEqual(parser.error_list, [])
 
 if __name__ == '__main__':
     unittest.main()

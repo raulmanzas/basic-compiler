@@ -63,6 +63,14 @@ class PatternHelpers():
         unary_operators = ["-", "*", "?"]
         return char in unary_operators
 
+    def is_mulop(self, char):
+        mul_ops = ["*", "/", "%"]
+        return char in mul_ops
+
+    def is_sumop(self, char):
+        sum_ops = ["+", "-"]
+        return char in sum_ops
+
     def is_relational_operator(self, char):
         relational_operators = ["<=", "<", ">", ">=", "==", "!="]
         return char in relational_operators
@@ -82,6 +90,28 @@ class PatternHelpers():
     def is_data_type(self, lexeme):
         types = ["int", "char", "bool"]
         return lexeme in types
+
+    def is_contracted_operator(self, lexeme):
+        ops = ["=", "+=", "-=", "*=", "/=", "++", "--"]
+        return lexeme in ops
+
+    def is_constant_token(self, token):
+        if token.token_class == TokenClass.NUMCONST or token.token_class == TokenClass.CHARCONST:
+            return True
+        return token.value == "true" or token.value == "false"
+
+    def is_statement_token(self, token):
+        #check the grammar definition to understand this
+        pattern_starters = ["{", "if", "while", "break", "return"]
+        if token.token_class == TokenClass.ID:
+            return True
+        return token.value in pattern_starters
+
+    def is_rel_expression_token(self, token):
+        if self.token_class == TokenClass.ID:
+            return True
+        return self.is_unary_operator(token.value) or token.value == "("
+
 
 class SymbolTable():
     def __init__(self):
@@ -160,7 +190,13 @@ class SyntaxNodeTypes(Enum):
     INITIALIZE_DECL_VAR = 54,
     EXPRESSION_SIMPLE = 55,
     EXPRESISON_AND = 56,
-    EXPRESSION_REL = 57
+    EXPRESSION_REL = 57,
+    NEW_MUTABLE = 58,
+    LIST_ARG = 59,
+    NEW_TERM = 60,
+    EXPRESSION_SUM = 61,
+    LIST_STATEMENT = 62,
+    STATEMENT_SELECTION = 63,
 
 class SyntaxNode():
     def __init__(self, node_type):
