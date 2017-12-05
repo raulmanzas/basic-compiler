@@ -24,6 +24,16 @@ class Parser():
             if self.current_token.value != expected_value:
                 self.register_error(self.current_token, expected_value)
     
+    def register_error_if_current_is_not(self, expected_value = None, expected_class = None):
+        #should validate if expected class is a valid class?
+        if expected_value:
+            if self.current_token.value != expected_value:
+                self.register_error(self.current_token, expected_value)
+        elif expected_class:
+            if self.current_token.token_class != expected_class:
+                self.register_error(self.current_token, expected_class)
+        self.current_token = self.scanner.next_token()        
+
     def parse(self):
         self.current_token = self.scanner.next_token()
         node = SyntaxNode(SyntaxNodeTypes.PROGRAM)
@@ -83,9 +93,12 @@ class Parser():
     
     def rec_declaration(self):
         node = SyntaxNode(SyntaxNodeTypes.REC_DECLARATION)
-        self.register_error_if_next_is_not("record")
-        self.register_error_if_next_is_not(expected_class=TokenClass.ID)
-        node.id = self.current_token
+        self.register_error_if_current_is_not("record")
+        if self.current_token.token_class != TokenClass.ID:
+            self.register_error(self.current_token, "identifier")
+            self.current_token = self.scanner.next_token()
+        else:
+            node.id = self.current_token
         self.register_error_if_next_is_not("{")        
         node.local_declarations = self.local_declarations()
         self.register_error_if_next_is_not("}")

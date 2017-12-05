@@ -22,7 +22,7 @@ def main(source_path):
             print("Lexical erros encountered!!")
         else:
             parser = Parser(symbol_table, lexer)
-            parser.parse()
+            ast = parser.parse()
             print("Done!")
     except Exception as e:
         print(e)
