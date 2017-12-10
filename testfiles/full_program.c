@@ -3,7 +3,7 @@ record point {
 }
 
 record line {
-    point x, y;
+    int x, y;
 }
 
 int ant(int bat, cat[]; bool dog, elk; int fox)

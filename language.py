@@ -108,7 +108,7 @@ class PatternHelpers():
         return token.value in pattern_starters
 
     def is_rel_expression_token(self, token):
-        if self.token_class == TokenClass.ID:
+        if token.token_class == TokenClass.ID:
             return True
         return self.is_unary_operator(token.value) or token.value == "("
 
@@ -189,7 +189,7 @@ class SyntaxNodeTypes(Enum):
     ID_DECL_VAR = 53,
     INITIALIZE_DECL_VAR = 54,
     EXPRESSION_SIMPLE = 55,
-    EXPRESISON_AND = 56,
+    EXPRESSION_AND = 56,
     EXPRESSION_REL = 57,
     NEW_MUTABLE = 58,
     LIST_ARG = 59,

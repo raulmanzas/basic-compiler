@@ -298,7 +298,7 @@ class TestParser(unittest.TestCase):
         parser = self.get_parser(mock_code)
         tree = parser.parse()
         
-        self.assertNotEqual(parser.error_list, [])
+        self.assertEqual(parser.error_list, [])
 
     def test_can_parse_function_declaration(self):
         mock_code = ["int fat(char letra)\{\}"]
