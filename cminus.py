@@ -23,7 +23,9 @@ def main(source_path):
         else:
             parser = Parser(symbol_table, lexer)
             ast = parser.parse()
-            print("Done!")
+            if len(parser.error_list) > 0:
+                for error in parser.error_list:
+                    print(error)
     except Exception as e:
         print(e)
 

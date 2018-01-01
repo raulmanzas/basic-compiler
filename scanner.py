@@ -164,7 +164,8 @@ class Scanner():
         return None
 
     def prior_token(self):
-        last_position = self.last_token - 1
+        self.last_token -= 1
+        last_position = self.last_token
         if last_position >= 0:
             self.last_token = last_position
             return self.tokens[self.last_token]

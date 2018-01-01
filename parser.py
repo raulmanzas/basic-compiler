@@ -94,16 +94,17 @@ class Parser():
             return node
 
         self.register_error(self.current_token, "type declaration")
+        return node
     
     def rec_declaration(self):
         node = SyntaxNode(SyntaxNodeTypes.REC_DECLARATION)
         self.register_error_if_current_is_not("record")
         if self.current_token.token_class != TokenClass.ID:
             self.register_error(self.current_token, "identifier")
-            self.current_token = self.scanner.next_token()
+            # self.current_token = self.scanner.next_token()
         else:
             node.id = self.current_token
-        self.register_error_if_next_is_not("{")        
+        self.register_error_if_next_is_not("{")
         node.local_declarations = self.local_declarations()
         self.register_error_if_current_is_not("}")
         return node
@@ -119,7 +120,7 @@ class Parser():
             self.register_error_if_next_is_not("(")
             self.current_token = self.scanner.next_token()
             node.params = self.params()
-            # self.register_error_if_current_is_not(")")
+            self.register_error_if_current_is_not(")")
             node.statement = self.statement()
             return node
 
@@ -134,18 +135,17 @@ class Parser():
 
     def local_declarations(self):
         node = SyntaxNodeTypes(SyntaxNodeTypes.LOCAL_DECLARATIONS)
-        node.declarations_local = self.declarations_local()
-        return node
+        # node.declarations_local = self.declarations_local()
+        return self.declarations_local()
 
     def declarations_local(self):
         node = SyntaxNode(SyntaxNodeTypes.DECLARATIONS_LOCAL)
-        self.current_token = self.scanner.next_token()
+        # self.current_token = self.scanner.next_token()
         token = self.current_token
         declarations = []
         while self.helpers.is_data_type(self.current_token.value) or self.current_token.value == "static":
             declaration = self.scoped_var_declaration()
             declarations.append(declaration)
-        
         if len(declarations) > 0:
             node.declarations_local = declarations
         return node
@@ -156,6 +156,7 @@ class Parser():
         node.var_decl_list = self.var_decl_list()
         self.register_error_if_current_is_not(";")
         # self.register_error_if_next_is_not(";")
+        # self.current_token = self.scanner.next_token()
         return node
 
     def var_decl_list(self):
@@ -172,7 +173,7 @@ class Parser():
 
     def initialize_decl_var(self):
         node = SyntaxNode(SyntaxNodeTypes.INITIALIZE_DECL_VAR)
-        if self.current_token.value == ":":
+        if self.current_token.value == "=":
             self.current_token = self.scanner.next_token()
             node.simple_expression = self.simple_expression()
             return node
@@ -189,8 +190,10 @@ class Parser():
     def id_decl_var(self):
         node = SyntaxNode(SyntaxNodeTypes.ID_DECL_VAR)
         if self.current_token.value == "[":
+            self.current_token = self.scanner.next_token()
             node.id_decl_var = self.current_token
             self.register_error_if_next_is_not("]")
+            self.current_token = self.scanner.next_token() #last change
             return node
         return node
 
@@ -246,8 +249,8 @@ class Parser():
         if self.helpers.is_data_type(self.current_token.value):
             node = SyntaxNode(SyntaxNodeTypes.PARAM_LIST)
             node.param_type_list = self.param_type_list()
-            self.register_error_if_current_is_not(")")
-            self.current_token = self.scanner.next_token()
+            # self.register_error_if_current_is_not(")")
+            # self.current_token = self.scanner.next_token()
             node.list_param = self.list_param()
             return node
         return None
@@ -303,7 +306,7 @@ class Parser():
         while self.helpers.is_data_type(self.current_token.value):
             param_type_list = self.param_type_list()
             list_params.append(param_type_list)
-            self.current_token = self.scanner.next_token()
+            # self.current_token = self.scanner.next_token()
         
         if len(list_params) > 0:
             node.list_param = list_params
@@ -365,6 +368,7 @@ class Parser():
         if self.current_token.value == "break":
             node.break_statement = self.current_token
             self.register_error_if_next_is_not(";")
+            self.current_token = self.scanner.next_token()
             return node
 
         self.register_error(self.current_token, "break statement")
@@ -421,6 +425,10 @@ class Parser():
         if self.helpers.is_rel_expression_token(self.current_token):
             node.rel_expression = self.rel_expression()
             return node
+        if self.current_token.value in ["true", "false"]:
+            # self.current_token = self.scanner.prior_token()
+            node.rel_expression = self.rel_expression()
+            return node
 
         self.register_error(self.current_token, "relational operator")
         return node
@@ -435,7 +443,8 @@ class Parser():
         node = SyntaxNode(SyntaxNodeTypes.EXPRESSION_REL)
         if self.helpers.is_relational_operator(self.current_token.value):
             node.relop = self.relop()
-            node.sum_expression = self.sum_expresison()
+            self.current_token = self.scanner.next_token()
+            node.sum_expression = self.sum_expression()
             return node
         return node
 
@@ -489,6 +498,7 @@ class Parser():
             return node
         elif self.helpers.is_constant_token(self.current_token):
             node.constant = self.constant()
+            self.current_token = self.scanner.next_token()
             return node
         else:
             self.register_error(self.current_token, "immutable expression")
@@ -511,14 +521,16 @@ class Parser():
         expressions = []
         while self.current_token.value == "[" or self.current_token.value == ".":
             if self.current_token.value == "[":
+                self.current_token = self.scanner.next_token()
                 expression = self.expression()
                 expressions.append(expression)
-                self.register_error_if_next_is_not("]")
+                self.register_error_if_current_is_not("]")
+                # self.current_token = self.scanner.next_token()
             elif self.current_token.value == ".":
                 self.current_token = self.scanner.next_token()
                 tk_id = self.current_token
                 ids.append(tk_id)
-            self.current_token = self.scanner.next_token()
+                self.current_token = self.scanner.next_token()
         
         if len(ids) > 0:
             node.ids = ids
@@ -529,7 +541,9 @@ class Parser():
     def factor(self):
         node = SyntaxNode(SyntaxNodeTypes.FACTOR)
         token = self.current_token
+        # next_token = self.scanner.see_next_token()
         if self.helpers.is_constant_token(token) or token.value == "(":
+            # self.current_token = self.scanner.next_token()
             node.immutable = self.immutable()
             return node
         
@@ -599,7 +613,6 @@ class Parser():
             ops.append(op)
             term = self.term()
             terms.append(term)
-            self.current_token = self.scanner.next_token()
         
         if len(ops) > 0:
             node.sumop = ops
@@ -619,6 +632,7 @@ class Parser():
             return node
         elif self.current_token.token_class == TokenClass.ID:
             node.expression = self.expression()
+            self.register_error_if_current_is_not(';')
             return node
         else:
             self.register_error(self.current_token, "; or identifier")
@@ -629,15 +643,17 @@ class Parser():
         self.register_error_if_current_is_not("{")
         node.local_declarations = self.local_declarations()
         node.statement_list = self.statement_list()
+        if self.current_token.value == "}":
+            self.current_token = self.scanner.next_token()
         # self.register_error_if_current_is_not("}")
         return node
 
     def selection_stmt(self):
         node = SyntaxNode(SyntaxNodeTypes.SELECTION_STATEMENT)
-        self.register_error_if_next_is_not("if")
-        self.register_error_if_next_is_not("(")
+        self.register_error_if_current_is_not("if")
+        self.register_error_if_current_is_not("(")
         node.simple_expression = self.simple_expression()
-        self.register_error_if_next_is_not(")")
+        self.register_error_if_current_is_not(")")
         node.statement = self.statement()
         node.stmt_selection = self.stmt_selection()
         return node
@@ -670,8 +686,9 @@ class Parser():
         if self.current_token.value != "while":
             self.register_error(self.current_token, "while statement")
         self.register_error_if_next_is_not("(")
+        self.current_token = self.scanner.next_token()
         node.simple_expression = self.simple_expression()
-        self.register_error_if_next_is_not(")")
+        self.register_error_if_current_is_not(")")
         node.statement = self.statement()
         return node
 
@@ -680,8 +697,8 @@ class Parser():
         statements = []
         while self.helpers.is_statement_token(self.current_token):
             statement = self.statement()
+            # self.register_error_if_current_is_not(";")
             statements.append(statement)
-            self.current_token = self.scanner.next_token()
         
         if len(statements) > 0:
             node.statement = statements
@@ -690,7 +707,7 @@ class Parser():
     def statement(self):
         node = SyntaxNode(SyntaxNodeTypes.STATEMENT)
         if self.current_token.token_class == TokenClass.ID:
-            node.expression = self.expression()
+            node.expression_stmt = self.expression_stmt()
             return node
         if self.current_token.value == "{":
             node.compound_stmt = self.compound_stmt()
@@ -703,7 +720,6 @@ class Parser():
             return node
         if self.current_token.value == "return":
             node.return_statement = self.return_statement()
-            self.current_token = self.scanner.next_token()
             return node
         if self.current_token.value == "break":
             node.break_statement = self.break_statement()
@@ -715,25 +731,56 @@ class Parser():
         node = SyntaxNode(SyntaxNodeTypes.EXPRESSION)
         if self.current_token.token_class == TokenClass.ID:
             next_token = self.scanner.see_next_token()
-            if self.helpers.is_contracted_operator(next_token.value):
+            if next_token.value == '(':
+                node.simple_expression = self.simple_expression()
+                return node
+            node.mutable = self.mutable()
+            if self.helpers.is_contracted_operator(self.current_token.value):
                 node.op = self.current_token
                 self.current_token = self.scanner.next_token()
-                if node.op.value == "++" or node.op.value =="--":
-                    return node
-
+                return node
+            if self.helpers.is_assignment_operator(self.current_token.value):
+                node.op = self.current_token
+                self.current_token = self.scanner.next_token()
                 node.expression = self.expression()
                 return node
-            elif self.helpers.is_operator(next_token.value):
-                node.mulop = self.sum_expression()
+            if self.helpers.is_sumop(self.current_token.value):
+                node.expression_sum = self.expression_sum()
                 return node
-            else:
-                self.register_error(self.current_token, "contracted operator")
-                return node
-        
-        if self.current_token.value == "not":
+            return node
+        if self.current_token.value == '(' or self.helpers.is_constant_token(self.current_token):
             node.simple_expression = self.simple_expression()
             return node
-        self.register_error(self.current_token, "expression")
-        return node
+        if self.helpers.is_logical_operator(self.current_token.value):
+            node.simple_expression = self.simple_expression()
+            return node
+        self.register_error(self.current_token, 'valid expression')
+    # def expression(self):
+    #     node = SyntaxNode(SyntaxNodeTypes.EXPRESSION)
+    #     if self.current_token.token_class == TokenClass.ID:
+    #         next_token = self.scanner.see_next_token()
+    #         if self.helpers.is_contracted_operator(next_token.value):
+    #             self.current_token = self.scanner.next_token()
+    #             node.op = self.current_token
+    #             self.current_token = self.scanner.next_token()
+    #             if node.op.value == "++" or node.op.value =="--":
+    #                 return node
+        #         node.expression = self.expression()
+        #         return node
+        #     elif self.helpers.is_operator(next_token.value):
+        #         node.mulop = self.sum_expression()
+        #         return node
+        #     else:
+        #         self.register_error(self.current_token, "contracted operator")
+        #         return node
+        # if self.helpers.is_constant_token(self.current_token):
+        #     node.simple_expression = self.simple_expression()
+        #     return node
+
+        # if self.current_token.value == "not":
+        #     node.simple_expression = self.simple_expression()
+        #     return node
+        # self.register_error(self.current_token, "expression")
+        # return node
 
 

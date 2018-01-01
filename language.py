@@ -92,7 +92,11 @@ class PatternHelpers():
         return lexeme in types
 
     def is_contracted_operator(self, lexeme):
-        ops = ["=", "+=", "-=", "*=", "/=", "++", "--"]
+        ops = ["++", "--"]
+        return lexeme in ops
+
+    def is_assignment_operator(self, lexeme):
+        ops = ['=', '+=', '-=', '*=', '/=']
         return lexeme in ops
 
     def is_constant_token(self, token):
@@ -108,7 +112,7 @@ class PatternHelpers():
         return token.value in pattern_starters
 
     def is_rel_expression_token(self, token):
-        if token.token_class == TokenClass.ID:
+        if token.token_class == TokenClass.ID or token.token_class == TokenClass.NUMCONST:
             return True
         return self.is_unary_operator(token.value) or token.value == "("
 
@@ -204,3 +208,6 @@ class SyntaxNode():
             Exception("Syntax Tree node type does is invalid!")
         
         self.type = node_type
+    
+    def __str__(self):
+        return "{}".format(self.type)
