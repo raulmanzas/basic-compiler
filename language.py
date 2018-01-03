@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from enum import Enum
+import copy
 
 class TokenClass(Enum):
     ID = 1
@@ -120,20 +121,41 @@ class PatternHelpers():
 class SymbolTable():
     def __init__(self):
         self.hashtable = {}
+        self.current_scope = 0
     
     def store(self, token):
+        token.scope = self.current_scope
         if token.value not in self.hashtable:
-            self.hashtable[token.value] = token
+            self.hashtable[token.value] = [token]
+        else:
+            # Verify if that id exists in the same scope
+            tk_list = self.hashtable[token.value]
+            if len(tk_list) == 1 and token.scope == 0:
+                return
+            for tk in tk_list:
+                if tk.scope == self.current_scope:
+                    raise Exception("Name already exists in scope!")
+            tk_list.append(token)
     
     def lookup(self, value):
         if self.hashtable[value]:
-            return self.hashtable[value]
+            tk_list = self.hashtable[value]
+            return tk_list[-1] #pop of the stack
         return None
 
-    def set_type(self, key, data_type):
-        ocurrence = self.hashtable[key]
-        if ocurrence:
-            ocurrence.data_type = data_type
+    def set_type(self, token, data_type):
+        new_token = copy.copy(token)
+        new_token.data_type = data_type
+        self.store(new_token)
+    
+    def push_scope(self):
+        self.current_scope += 1
+    
+    def kill_scope(self):
+        for key, tk_list in self.hashtable.items():
+            if tk_list[-1].scope == self.current_scope:
+                tk_list.pop()
+        self.current_scope -= 1
 
     def __str__(self):
         representation = ""

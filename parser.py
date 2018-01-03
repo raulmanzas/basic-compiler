@@ -44,7 +44,9 @@ class Parser():
         # empty source code should return just the root node
         if self.current_token == None:
             return node
+        self.symbol_table.push_scope()
         node.declaration_list = self.declaration_list()
+        self.symbol_table.kill_scope()
         print("Finalizei!")
         return node
     
@@ -106,8 +108,10 @@ class Parser():
         else:
             node.id = self.current_token
         self.register_error_if_next_is_not("{")
+        self.symbol_table.push_scope()
         node.local_declarations = self.local_declarations()
         self.register_error_if_current_is_not("}")
+        self.symbol_table.kill_scope()
         return node
 
     def fun_declaration(self):
@@ -118,7 +122,7 @@ class Parser():
         
         if self.current_token.token_class == TokenClass.ID:
             node.id = self.current_token
-            self.symbol_table.set_type(node.id.value, self.last_data_type)
+            self.symbol_table.set_type(node.id, self.last_data_type)
             self.register_error_if_next_is_not("(")
             self.current_token = self.scanner.next_token()
             node.params = self.params()
@@ -186,7 +190,7 @@ class Parser():
         self.register_error_if_next_is_not(expected_class=TokenClass.ID)
         node.id = self.current_token
         # Sets the datatype in the symboltable for future reference
-        self.symbol_table.set_type(node.id.value, self.last_data_type)
+        self.symbol_table.set_type(node.id, self.last_data_type)
         self.current_token = self.scanner.next_token()
         node.id_decl_var = self.id_decl_var()
         return node
@@ -278,7 +282,7 @@ class Parser():
         node = SyntaxNode(SyntaxNodeTypes.PARAM_ID)
         self.register_error_if_next_is_not(expected_class=TokenClass.ID)
         node.id = self.current_token
-        self.symbol_table.set_type(node.id.value, self.last_data_type)
+        self.symbol_table.set_type(node.id, self.last_data_type)
         self.current_token = self.scanner.next_token()
         node.idParam = self.id_param()
         return node
@@ -648,9 +652,11 @@ class Parser():
     def compound_stmt(self):
         node = SyntaxNode(SyntaxNodeTypes.COMPOUND_STATEMENT)
         self.register_error_if_current_is_not("{")
+        self.symbol_table.push_scope()
         node.local_declarations = self.local_declarations()
         node.statement_list = self.statement_list()
         if self.current_token.value == "}":
+            self.symbol_table.kill_scope()
             self.current_token = self.scanner.next_token()
         # self.register_error_if_current_is_not("}")
         return node
