@@ -130,6 +130,11 @@ class SymbolTable():
             return self.hashtable[value]
         return None
 
+    def set_type(self, key, data_type):
+        ocurrence = self.hashtable[key]
+        if ocurrence:
+            ocurrence.data_type = data_type
+
     def __str__(self):
         representation = ""
         for key in self.hashtable.keys():

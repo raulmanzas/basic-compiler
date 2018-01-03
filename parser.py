@@ -9,6 +9,7 @@ class Parser():
         self.syntax_tree = None
         self.current_token = None
         self.error_list = []
+        self.last_data_type = None
         self.helpers = PatternHelpers()
     
     def register_error(self, token, expected):
@@ -117,6 +118,7 @@ class Parser():
         
         if self.current_token.token_class == TokenClass.ID:
             node.id = self.current_token
+            self.symbol_table.set_type(node.id.value, self.last_data_type)
             self.register_error_if_next_is_not("(")
             self.current_token = self.scanner.next_token()
             node.params = self.params()
@@ -183,6 +185,8 @@ class Parser():
         node = SyntaxNode(SyntaxNodeTypes.VAR_DEC_ID)
         self.register_error_if_next_is_not(expected_class=TokenClass.ID)
         node.id = self.current_token
+        # Sets the datatype in the symboltable for future reference
+        self.symbol_table.set_type(node.id.value, self.last_data_type)
         self.current_token = self.scanner.next_token()
         node.id_decl_var = self.id_decl_var()
         return node
@@ -225,6 +229,7 @@ class Parser():
         node = SyntaxNode(SyntaxNodeTypes.TYPE_SPECIFIER)
         if self.current_token.token_class == TokenClass.ID:
             node.id = self.current_token
+            self.last_data_type = self.current_token.value
         elif self.helpers.is_data_type(self.current_token.value):
             node.return_type_specifier = self.return_type_specifier()
             
@@ -235,6 +240,7 @@ class Parser():
         if self.helpers.is_data_type(self.current_token.value):
             node = SyntaxNode(SyntaxNodeTypes.RETURN_TYPE_SPECIFIER)
             node.return_type_specifier = self.current_token
+            self.last_data_type = self.current_token.value
             # self.current_token = self.scanner.next_token()
             return node
         self.register_error(self.current_token, "data type")
@@ -272,6 +278,7 @@ class Parser():
         node = SyntaxNode(SyntaxNodeTypes.PARAM_ID)
         self.register_error_if_next_is_not(expected_class=TokenClass.ID)
         node.id = self.current_token
+        self.symbol_table.set_type(node.id.value, self.last_data_type)
         self.current_token = self.scanner.next_token()
         node.idParam = self.id_param()
         return node

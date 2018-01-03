@@ -9,11 +9,11 @@ from language import SymbolTable
 
 def main(source_path):
     # All exceptions should be captured here
+    symbol_table = SymbolTable()
     try:
         with open(source_path) as source:
             code = source.readlines()
         source.close()
-        symbol_table = SymbolTable()
         lexer = Scanner(code, symbol_table)
         lexer.scan()
 
@@ -23,6 +23,7 @@ def main(source_path):
         else:
             parser = Parser(symbol_table, lexer)
             ast = parser.parse()
+            
             if len(parser.error_list) > 0:
                 for error in parser.error_list:
                     print(error)
