@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from language import SyntaxNode, SyntaxNodeTypes, TokenClass, PatternHelpers
+from language import *
 
 class Parser():
     def __init__(self, symbol_table, scanner):
         self.symbol_table = symbol_table
         self.scanner = scanner
+        self.semantic_helpers = SemanticHelpers(symbol_table)
         self.syntax_tree = None
         self.current_token = None
         self.error_list = []
         self.last_data_type = None
+        self.last_constant = None
+        self.last_id = None
         self.helpers = PatternHelpers()
     
     def register_error(self, token, expected):
@@ -123,6 +126,7 @@ class Parser():
         if self.current_token.token_class == TokenClass.ID:
             node.id = self.current_token
             self.symbol_table.set_type(node.id, self.last_data_type)
+            self.last_id = node.id
             self.register_error_if_next_is_not("(")
             self.current_token = self.scanner.next_token()
             node.params = self.params()
@@ -175,6 +179,7 @@ class Parser():
         node = SyntaxNode(SyntaxNodeTypes.VAR_DEC_INITIALIZE)
         node.var_decl_id = self.var_decl_id()
         node.initialize_decl_var = self.initialize_decl_var()
+        self.semantic_helpers.assign_value(self.last_id, self.last_constant)
         return node
 
     def initialize_decl_var(self):
@@ -191,6 +196,7 @@ class Parser():
         node.id = self.current_token
         # Sets the datatype in the symboltable for future reference
         self.symbol_table.set_type(node.id, self.last_data_type)
+        self.last_id = node.id
         self.current_token = self.scanner.next_token()
         node.id_decl_var = self.id_decl_var()
         return node
@@ -283,6 +289,7 @@ class Parser():
         self.register_error_if_next_is_not(expected_class=TokenClass.ID)
         node.id = self.current_token
         self.symbol_table.set_type(node.id, self.last_data_type)
+        self.last_id = node.id
         self.current_token = self.scanner.next_token()
         node.idParam = self.id_param()
         return node
@@ -327,12 +334,15 @@ class Parser():
         node = SyntaxNode(SyntaxNodeTypes.CONSTANT)
         if self.current_token.token_class == TokenClass.NUMCONST:
             node.num_const = self.current_token
+            self.last_constant = node.num_const
             return node
         if self.current_token.token_class == TokenClass.CHARCONST:
             node.char_const = self.current_token
+            self.last_constant = node.char_const
             return node
         if self.current_token.value == "true" or self.current_token.value == "false":
             node.boolean = self.current_token
+            self.last_constant = node.boolean
             return node
         self.register_error(self.current_token, "data literal")
         return None
@@ -361,6 +371,7 @@ class Parser():
             self.register_error(self.current_token, "identifier")
         else:
             node.id = self.current_token
+            self.last_id = node.id
         self.current_token = self.scanner.next_token()
         self.register_error_if_next_is_not("(")
         node.args = self.args()
@@ -519,6 +530,7 @@ class Parser():
         node = SyntaxNode(SyntaxNodeTypes.MUTABLE)
         if self.current_token.token_class == TokenClass.ID:
             node.id = self.current_token
+            self.last_id = node.id
             self.current_token = self.scanner.next_token()
             node.new_mutable = self.new_mutable()
             return node

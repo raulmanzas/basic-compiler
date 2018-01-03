@@ -156,7 +156,7 @@ class SymbolTable():
             if tk_list[-1].scope == self.current_scope:
                 tk_list.pop()
         self.current_scope -= 1
-
+    
     def __str__(self):
         representation = ""
         for key in self.hashtable.keys():
@@ -238,3 +238,22 @@ class SyntaxNode():
     
     def __str__(self):
         return "{}".format(self.type)
+
+class SemanticHelpers():
+    def __init__(self, symbol_table):
+        self.symbol_table = symbol_table
+
+    def assign_value(self, token, const):
+        if not const:
+            return 
+        token = self.symbol_table.lookup(token.value)
+        if const.token_class == TokenClass.CHARCONST and token.data_type == "char":
+            token.variable_value = const
+            return
+        if const.token_class == TokenClass.NUMCONST and token.data_type == "int":
+            token.variable_value = const
+            return
+        if const.value == "true" or const.value == "false" and token.data_type == "bool":
+            token.variable_value = const
+            return
+        raise Exception("Invalid type assignment!")
