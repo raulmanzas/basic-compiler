@@ -113,7 +113,11 @@ class PatternHelpers():
         return token.value in pattern_starters
 
     def is_rel_expression_token(self, token):
-        if token.token_class == TokenClass.ID or token.token_class == TokenClass.NUMCONST:
+        if token.token_class == TokenClass.ID:
+            return True
+        if token.token_class == TokenClass.NUMCONST:
+            return True
+        if token.token_class == TokenClass.CHARCONST:
             return True
         return self.is_unary_operator(token.value) or token.value == "("
 
@@ -245,7 +249,10 @@ class SemanticHelpers():
 
     def assign_value(self, token, const):
         if not const:
-            return 
+            return
+        if const.token_class == TokenClass.ID:
+            return self.assign_id_to_id(token, const)
+
         token = self.symbol_table.lookup(token.value)
         if const.token_class == TokenClass.CHARCONST and token.data_type == "char":
             token.variable_value = const
@@ -257,3 +264,31 @@ class SemanticHelpers():
             token.variable_value = const
             return
         raise Exception("Invalid type assignment!")
+    
+    def assign_id_to_id(self, left_id, right_id):
+        left_token = self.symbol_table.lookup(left_id.value)
+        right_token = self.symbol_table.lookup(right_id.value)
+        if left_token.data_type != right_token.data_type:
+            raise Exception("Invalid type assignment!")
+        left_token.variable_value = right_token.value
+        return
+
+    def validate_type(self, func_id, return_token):
+        func_type = self.symbol_table.lookup(func_id.value).data_type
+        if return_token.token_class == TokenClass.ID:
+            return_type = self.symbol_table.lookup(return_token.value).data_type
+            if func_type == return_type:
+                return
+        if return_token.token_class == TokenClass.CHARCONST:
+            if func_type == 'char':
+                return
+        if return_token.token_class == TokenClass.NUMCONST:
+            if func_type == 'int':
+                return
+        raise Exception("Return type should be '{0}'".format(func_type))
+    
+    def is_valid_variable(self, variable_id):
+        var_token = self.symbol_table.lookup(variable_id.value)
+        if hasattr(var_token, "data_type"):
+            return
+        raise Exception("Variable '{0}' wasn't declared".format(variable_id.value))

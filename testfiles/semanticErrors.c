@@ -1,7 +1,8 @@
 
+
 int main(){
     int array[5];
-    bool size = 5;
+    int size = 5;
     int i = 0;
     char c = 's';
     while(i < size){

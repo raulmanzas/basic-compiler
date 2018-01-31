@@ -13,6 +13,7 @@ class Parser():
         self.last_data_type = None
         self.last_constant = None
         self.last_id = None
+        self.last_func_id = None
         self.helpers = PatternHelpers()
     
     def register_error(self, token, expected):
@@ -50,7 +51,6 @@ class Parser():
         self.symbol_table.push_scope()
         node.declaration_list = self.declaration_list()
         self.symbol_table.kill_scope()
-        print("Finalizei!")
         return node
     
     def declaration_list(self):
@@ -127,6 +127,7 @@ class Parser():
             node.id = self.current_token
             self.symbol_table.set_type(node.id, self.last_data_type)
             self.last_id = node.id
+            self.last_func_id = node.id
             self.register_error_if_next_is_not("(")
             self.current_token = self.scanner.next_token()
             node.params = self.params()
@@ -530,6 +531,7 @@ class Parser():
         node = SyntaxNode(SyntaxNodeTypes.MUTABLE)
         if self.current_token.token_class == TokenClass.ID:
             node.id = self.current_token
+            self.semantic_helpers.is_valid_variable(node.id)
             self.last_id = node.id
             self.current_token = self.scanner.next_token()
             node.new_mutable = self.new_mutable()
@@ -701,6 +703,10 @@ class Parser():
             return node
         else:
             node.expression = self.expression()
+            if(self.scanner.see_prior_token().token_class == TokenClass.ID):
+                self.semantic_helpers.validate_type(self.last_func_id, self.last_id)
+            else:
+                self.semantic_helpers.validate_type(self.last_func_id, self.last_constant)
             if self.current_token.value != ";":
                 self.register_error(self.current_token, ";")
             self.current_token = self.scanner.next_token()
@@ -767,7 +773,12 @@ class Parser():
             if self.helpers.is_assignment_operator(self.current_token.value):
                 node.op = self.current_token
                 self.current_token = self.scanner.next_token()
+                left_id = self.last_id
                 node.expression = self.expression()
+                if left_id.value == self.last_id.value:
+                    self.semantic_helpers.assign_value(left_id, self.last_constant)
+                else:
+                    self.semantic_helpers.assign_value(left_id, self.last_id)
                 return node
             if self.helpers.is_sumop(self.current_token.value):
                 node.expression_sum = self.expression_sum()
@@ -780,32 +791,3 @@ class Parser():
             node.simple_expression = self.simple_expression()
             return node
         self.register_error(self.current_token, 'valid expression')
-    # def expression(self):
-    #     node = SyntaxNode(SyntaxNodeTypes.EXPRESSION)
-    #     if self.current_token.token_class == TokenClass.ID:
-    #         next_token = self.scanner.see_next_token()
-    #         if self.helpers.is_contracted_operator(next_token.value):
-    #             self.current_token = self.scanner.next_token()
-    #             node.op = self.current_token
-    #             self.current_token = self.scanner.next_token()
-    #             if node.op.value == "++" or node.op.value =="--":
-    #                 return node
-        #         node.expression = self.expression()
-        #         return node
-        #     elif self.helpers.is_operator(next_token.value):
-        #         node.mulop = self.sum_expression()
-        #         return node
-        #     else:
-        #         self.register_error(self.current_token, "contracted operator")
-        #         return node
-        # if self.helpers.is_constant_token(self.current_token):
-        #     node.simple_expression = self.simple_expression()
-        #     return node
-
-        # if self.current_token.value == "not":
-        #     node.simple_expression = self.simple_expression()
-        #     return node
-        # self.register_error(self.current_token, "expression")
-        # return node
-
-

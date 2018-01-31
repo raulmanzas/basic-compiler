@@ -170,3 +170,7 @@ class Scanner():
             self.last_token = last_position
             return self.tokens[self.last_token]
         return None
+
+    def see_prior_token(self):
+        last_token = self.last_token - 1
+        return self.tokens[last_token]
