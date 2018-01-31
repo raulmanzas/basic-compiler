@@ -45,7 +45,7 @@ class Parser():
     def parse(self):
         self.current_token = self.scanner.next_token()
         node = SyntaxNode(SyntaxNodeTypes.PROGRAM)
-        # empty source code should return just the root node
+        # empty source code should just return the root node
         if self.current_token == None:
             return node
         self.symbol_table.push_scope()

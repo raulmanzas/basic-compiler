@@ -89,7 +89,7 @@ class PatternHelpers():
         return lexeme in keywords
 
     def is_data_type(self, lexeme):
-        types = ["int", "char", "bool"]
+        types = ["int", "char", "bool", "void"]
         return lexeme in types
 
     def is_contracted_operator(self, lexeme):
@@ -138,7 +138,7 @@ class SymbolTable():
                 return
             for tk in tk_list:
                 if tk.scope == self.current_scope:
-                    raise Exception("Name already exists in scope!")
+                    raise Exception("Name already exists in scope! ({0}:{1})".format(token.line, token.column))
             tk_list.append(token)
     
     def lookup(self, value):
@@ -263,13 +263,13 @@ class SemanticHelpers():
         if const.value == "true" or const.value == "false" and token.data_type == "bool":
             token.variable_value = const
             return
-        raise Exception("Invalid type assignment!")
+        raise Exception("Invalid type assignment at '" + token.value + "' (" + str(token.line) + ":" + str(token.column) + ")")
     
     def assign_id_to_id(self, left_id, right_id):
         left_token = self.symbol_table.lookup(left_id.value)
         right_token = self.symbol_table.lookup(right_id.value)
         if left_token.data_type != right_token.data_type:
-            raise Exception("Invalid type assignment!")
+            raise Exception("Invalid type assignment at '" + right_token.value + "' (" + str(right_token.line) + ":" + str(right_token.column) + ")")
         left_token.variable_value = right_token.value
         return
 
@@ -291,4 +291,4 @@ class SemanticHelpers():
         var_token = self.symbol_table.lookup(variable_id.value)
         if hasattr(var_token, "data_type"):
             return
-        raise Exception("Variable '{0}' wasn't declared".format(variable_id.value))
+        raise Exception("Variable '{0}' wasn't declared ({1}:{2})".format(variable_id.value, variable_id.line, variable_id.column))

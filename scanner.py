@@ -147,8 +147,6 @@ class Scanner():
         if self.error_list:
             for err in self.error_list:
                 print(err)
-        else:
-            print(self.symbol_table)
     
     def next_token(self):
         next_token_index = self.last_token + 1
